@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>INVAL PLUS | Investment Packages</title>
+  
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,900&display=swap");
+
+    :root {
+      --bg-color: #050505;
+      --card-bg: rgba(17, 17, 17, 0.85);
+      --primary-red: #d30d18;
+      --dark-red: #800000;
+      --gold: #ffd700;
+      --text-white: #ffffff;
+      --text-gray: #a0a0a0;
+      --border-color: #222222;
+      --nav-bg: rgba(10, 10, 10, 0.95);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Montserrat", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-white);
+      padding-bottom: 95px;
+    }
+
+    /* Top Announcement Banner */
+    .announcement-banner {
+      background: linear-gradient(90deg, #800000, #d30d18, #800000);
+      color: #fff;
+      text-align: center;
+      padding: 10px 15px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 15px rgba(211, 13, 24, 0.4);
+      animation: fadeInDown 0.4s ease-out;
+    }
+
+    .announcement-banner.visible {
+      display: flex;
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Top Navbar */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 3%;
+      background-color: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--primary-red);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .menu-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: var(--text-white);
+    }
+
+    /* Brand Logo + Title Container */
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .brand-logo-img {
+      height: 34px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 4px rgba(211, 13, 24, 0.5));
+    }
+
+    .brand-text-wrapper {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    .brand-title-text {
+      font-size: 15px;
+      font-weight: 900;
+      letter-spacing: 1.2px;
+      font-style: italic;
+      background: linear-gradient(180deg, #ffffff 30%, #a0a0a0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+    }
+
+    .brand-title-text span {
+      background: linear-gradient(180deg, #ff3b47 20%, #990000 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtext {
+      font-size: 6px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .wallet-badge {
+      background: linear-gradient(135deg, #1f0000, #3d0000);
+      border: 1px solid var(--gold);
+      border-radius: 20px;
+      padding: 5px 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 11px;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.15);
+      white-space: nowrap;
+    }
+
+    .wallet-badge span {
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    /* Sidebar Drawer */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(4px);
+      z-index: 1050;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -270px;
+      width: 270px;
+      height: 100%;
+      background: #111111;
+      border-right: 1px solid var(--border-color);
+      z-index: 1100;
+      padding: 20px;
+      transition: left 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-gray);
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sidebar-menu a, .sidebar-menu button {
+      color: var(--text-white);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 12px;
+      border-radius: 6px;
+      display: block;
+      transition: background 0.2s ease;
+      background: transparent;
+      border: none;
+      text-align: left;
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .sidebar-menu a:hover, .sidebar-menu button:hover {
+      background: rgba(211, 13, 24, 0.15);
+      color: var(--gold);
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: var(--border-color);
+      margin: 10px 0;
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 1200px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 6px;
+      font-size: 24px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+
+    .section-title span {
+      color: var(--gold);
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: var(--text-gray);
+      margin-bottom: 25px;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
+    /* Package Grid */
+    .package-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+
+    .package-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 22px 16px;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .package-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--primary-red);
+      box-shadow: 0 8px 20px rgba(211, 13, 24, 0.25);
+    }
+
+    .package-name {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 4px;
+      background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+      padding: 4px 0;
+      border-radius: 4px;
+    }
+
+    .package-price {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-white);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .package-duration {
+      font-size: 11px;
+      color: var(--text-gray);
+      text-align: center;
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+    }
+
+    .package-details {
+      list-style: none;
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+      margin-bottom: 18px;
+    }
+
+    .package-details li {
+      margin-bottom: 8px;
+      font-size: 12px;
+      color: var(--text-gray);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .package-details li span {
+      color: var(--text-white);
+      font-weight: 600;
+    }
+
+    .btn-buy {
+      background: linear-gradient(180deg, var(--primary-red), var(--dark-red));
+      color: var(--text-white);
+      border: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-buy:hover:not(:disabled) {
+      background: linear-gradient(180deg, #ff1a25, #990000);
+      box-shadow: 0 4px 15px rgba(211, 13, 24, 0.4);
+    }
+
+    .btn-buy:disabled {
+      background: #333333;
+      color: #777777;
+      cursor: not-allowed;
+      border: 1px solid #444444;
+    }
+
+    .empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-gray);
+      font-size: 14px;
+    }
+
+    /* System Pause Modal Overlay */
+    .pause-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(10px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .pause-modal-overlay.active {
+      display: flex;
+    }
+
+    .pause-modal-card {
+      background: #121212;
+      border: 2px solid var(--primary-red);
+      border-radius: 16px;
+      max-width: 440px;
+      width: 100%;
+      padding: 30px 24px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(211, 13, 24, 0.4);
+      animation: modalPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .pause-logo {
+      max-height: 55px;
+      width: auto;
+      margin-bottom: 16px;
+      filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+    }
+
+    .pause-badge {
+      display: inline-block;
+      background: rgba(211, 13, 24, 0.2);
+      border: 1px solid var(--primary-red);
+      color: #ff4d4d;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 12px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 12px;
+    }
+
+    .pause-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text-white);
+      margin-bottom: 8px;
+    }
+
+    .pause-msg {
+      font-size: 12px;
+      color: var(--text-gray);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    .countdown-box {
+      background: #0a0a0a;
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 20px;
+    }
+
+    .countdown-label {
+      font-size: 10px;
+      color: var(--gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px;
+    }
+
+    .countdown-timer {
+      font-size: 26px;
+      font-weight: 900;
+      color: #ffffff;
+      letter-spacing: 2px;
+      font-family: monospace;
+    }
+
+    .pause-btn-dismiss {
+      background: #222222;
+      color: #ffffff;
+      border: 1px solid #444444;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      width: 100%;
+      text-transform: uppercase;
+      transition: background 0.2s;
+    }
+
+    .pause-btn-dismiss:hover {
+      background: #333333;
+    }
+
+    /* Info Modals for FAQs & Terms */
+    .info-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .info-modal-overlay.active {
+      display: flex;
+    }
+
+    .info-modal-card {
+      background: rgba(17, 17, 17, 0.95);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      max-width: 500px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 22px;
+    }
+
+    .info-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 10px;
+      margin-bottom: 15px;
+    }
+
+    .info-modal-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--gold);
+    }
+
+    .info-modal-body {
+      font-size: 13px;
+      color: var(--text-gray);
+      line-height: 1.6;
+    }
+
+    .info-modal-body h4 {
+      color: var(--text-white);
+      margin: 12px 0 4px 0;
+    }
+
+    /* Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.8);
+      padding: 0 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--text-gray);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      flex: 1;
+      height: 100%;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-icon-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 28px;
+      border-radius: 14px;
+      margin-bottom: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.3s ease, stroke 0.3s ease;
+    }
+
+    .nav-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 0%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-red), var(--gold));
+      border-radius: 0 0 4px 4px;
+      transition: width 0.3s ease;
+    }
+
+    .nav-item.active {
+      color: var(--text-white);
+      font-weight: 700;
+    }
+
+    .nav-item.active::before {
+      width: 50%;
+    }
+
+    .nav-item.active .nav-icon-wrapper {
+      background: rgba(211, 13, 24, 0.25);
+      box-shadow: 0 0 14px rgba(211, 13, 24, 0.5);
+    }
+
+    .nav-item.active svg {
+      stroke: var(--primary-red);
+      transform: translateY(-1px) scale(1.08);
+    }
+
+    .nav-item:hover:not(.active) {
+      color: var(--gold);
+    }
+
+    .nav-item:hover:not(.active) svg {
+      transform: translateY(-2px);
+      stroke: var(--gold);
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border-left: 4px solid var(--primary-red);
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .toast.success { border-left-color: #28a745; }
+    .toast.error { border-left-color: var(--primary-red); }
+    .toast.info { border-left-color: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Top Announcement Banner -->
+  <div class="announcement-banner" id="announcementBanner">
+    <span>🚀</span>
+    <span id="announcementText">A new high-yield package was added! Purchase to maximize profits.</span>
+  </div>
+
+  <!-- Top Navbar Header -->
+  <header>
+    <div class="header-left">
+      <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+      </button>
+      
+      <a href="packages.html" class="brand-title">
+        <img src="logo.png" alt="INVAL PLUS Logo" class="brand-logo-img">
+        <div class="brand-text-wrapper">
+          <span class="brand-title-text">INVAL <span>PLUS</span></span>
+          <span class="brand-subtext">INVESTMENTS</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="wallet-badge">
+      Balance: <span id="userBalance">UGX 0</span>
+    </div>
+  </header>
+
+  <!-- Sidebar Overlay & Drawer -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="packages.html" class="brand-title">
+        <img src="logo.png" alt="INVAL PLUS Logo" class="brand-logo-img">
+        <div class="brand-text-wrapper">
+          <span class="brand-title-text">INVAL <span>PLUS</span></span>
+          <span class="brand-subtext">INVESTMENTS</span>
+        </div>
+      </a>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="purchased.html">Purchased</a></li>
+      <li><a href="wallet.html">Wallet</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="support.html">Support</a></li>
+      <li class="sidebar-divider"></li>
+      <li><button onclick="openModal('faqModal'); toggleSidebar();">FAQs</button></li>
+      <li><button onclick="openModal('termsModal'); toggleSidebar();">Terms & Conditions</button></li>
+    </ul>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    <h1 class="section-title">Investment <span>Packages</span></h1>
+    <p class="section-subtitle">Select an active plan to start earning yields on INVAL PLUS</p>
+
+    <div class="package-grid" id="packageGrid">
+      <div class="empty-state">Loading available investment plans...</div>
+    </div>
+  </div>
+
+  <!-- System Pause Popup Overlay -->
+  <div class="pause-modal-overlay" id="pauseModalOverlay">
+    <div class="pause-modal-card">
+      <img src="logo.png" alt="INVAL PLUS" class="pause-logo" onerror="this.style.display='none';">
+      <div><span class="pause-badge">System Paused</span></div>
+      <h3 class="pause-title">Activities Closed</h3>
+      <p class="pause-msg">Our platform is currently paused by administration or outside scheduled operating hours. New package purchases, deposits, and withdrawals are locked until re-opening.</p>
+      
+      <div class="countdown-box">
+        <div class="countdown-label">Re-Opening Countdown</div>
+        <div class="countdown-timer" id="pauseCountdownTimer">00:00:00</div>
+      </div>
+
+      <button class="pause-btn-dismiss" onclick="closePauseModal()">View Purchased Packages</button>
+    </div>
+  </div>
+
+  <!-- FAQs Modal -->
+  <div class="info-modal-overlay" id="faqModal">
+    <div class="info-modal-card">
+      <div class="info-modal-header">
+        <span class="info-modal-title">Frequently Asked Questions</span>
+        <button class="close-btn" onclick="closeModal('faqModal')">&times;</button>
+      </div>
+      <div class="info-modal-body">
+        <h4>How do I buy a package?</h4>
+        <p>Ensure you have sufficient balance in your wallet, select a package from this page, and click 'Purchase Plan'.</p>
+        <h4>When do daily yields get credited?</h4>
+        <p>Yields accumulate daily based on your package plan duration. You can monitor active packages in the Purchased section.</p>
+        <h4>What happens during system pause hours?</h4>
+        <p>Purchases and transactions are paused, but your active investment timers and balances remain safe and running uninterrupted.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Terms & Conditions Modal -->
+  <div class="info-modal-overlay" id="termsModal">
+    <div class="info-modal-card">
+      <div class="info-modal-header">
+        <span class="info-modal-title">Terms & Conditions</span>
+        <button class="close-btn" onclick="closeModal('termsModal')">&times;</button>
+      </div>
+      <div class="info-modal-body">
+        <h4>1. Investment Agreement</h4>
+        <p>By purchasing a package on INVAL PLUS, you agree to the designated plan yield schedule and daily profit claim rules.</p>
+        <h4>2. System Operating Hours</h4>
+        <p>INVAL PLUS management reserves the right to schedule operational pause hours to process system records and security routines.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav">
+    <a href="packages.html" class="nav-item active">
+      <div class="nav-icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 12l10 5 10-5"/>
+          <path d="M2 17l10 5 10-5"/>
+        </svg>
+      </div>
+      <span>Packages</span>
+    </a>
+
+    <a href="purchased.html" class="nav-item">
+      <div class="nav-icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z"/>
+          <path d="M3 6h18"/>
+          <path d="M16 10a4 4 0 01-8 0"/>
+        </svg>
+      </div>
+      <span>Purchased</span>
+    </a>
+
+    <a href="wallet.html" class="nav-item">
+      <div class="nav-icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <rect x="3" y="3" width="18" height="18" rx="4"/>
+          <line x1="3" y1="9" x2="21" y2="9"/>
+          <circle cx="17.5" cy="6" r="0.8" fill="currentColor"/>
+        </svg>
+      </div>
+      <span>Wallet</span>
+    </a>
+
+    <a href="profile.html" class="nav-item">
+      <div class="nav-icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <span>Profile</span>
+    </a>
+
+    <a href="support.html" class="nav-item">
+      <div class="nav-icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 18v-6a9 9 0 0118 0v6"/>
+          <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/>
+        </svg>
+      </div>
+      <span>Support</span>
+    </a>
+  </nav>
+
+  <script>
+    function getSupabaseClient() {
+      if (window._invalSupabaseClient) {
+        return window._invalSupabaseClient;
+      }
+
+      const SUPABASE_URL = "https://tbxacrdbqpasphlktzkp.supabase.co";
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRieGFjcmRicXBhc3BobGt0emtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMjkwNTAsImV4cCI6MjEwMTcwNTA1MH0.9zUOBhxwPL2O4RPi-sKHKruYsejZvKxGS4E7l_L_AG0";
+
+      if (typeof window.supabase !== 'undefined' && typeof window.supabase.createClient === 'function') {
+        window._invalSupabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        return window._invalSupabaseClient;
+      }
+
+      return null;
+    }
+
+    let currentUser = null;
+    let userBalance = 0;
+    let isSystemPaused = false;
+    let countdownInterval = null;
+
+    // Toast Notification System
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+      
+      container.appendChild(toast);
+      setTimeout(() => toast.classList.add('show'), 10);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Sidebar Controls
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('active');
+      document.getElementById('sidebarOverlay').classList.toggle('active');
+    }
+
+    // Modal Controls
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('active');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('active');
+    }
+
+    function closePauseModal() {
+      closeModal('pauseModalOverlay');
+    }
+
+    // Display Top Announcement Banner
+    function showAnnouncement(message) {
+      const banner = document.getElementById('announcementBanner');
+      const text = document.getElementById('announcementText');
+      if (banner && text) {
+        text.innerText = message;
+        banner.classList.add('visible');
+      }
+    }
+
+    // 1. Fetch User Balance & Enforce Auth
+    async function fetchUserBalance() {
+      const db = getSupabaseClient();
+      if (!db) return;
+
+      try {
+        const { data: { user }, error: authError } = await db.auth.getUser();
+        if (authError || !user) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        currentUser = user;
+
+        const { data: profile, error: profileError } = await db
+          .from('Profiles')
+          .select('balance')
+          .eq('id', user.id)
+          .single();
+
+        if (profileError) return;
+
+        if (profile && profile.balance !== undefined) {
+          userBalance = profile.balance;
+          document.getElementById('userBalance').innerText = `UGX ${userBalance.toLocaleString()}`;
+        }
+
+        // Realtime Balance Listener
+        db.channel(`profile-balance-${currentUser.id}`)
+          .on('postgres_changes', { 
+            event: 'UPDATE', 
+            schema: 'public', 
+            table: 'Profiles', 
+            filter: `id=eq.${currentUser.id}` 
+          }, (payload) => {
+            if (payload.new && payload.new.balance !== undefined) {
+              userBalance = payload.new.balance;
+              document.getElementById('userBalance').innerText = `UGX ${userBalance.toLocaleString()}`;
+              loadPackages();
+            }
+          })
+          .subscribe();
+
+      } catch (err) {
+        console.error("Error fetching balance:", err);
+      }
+    }
+
+    // 2. Real-time Listener for Package Updates
+    function setupRealtimePackageUpdates() {
+      const db = getSupabaseClient();
+      if (!db) return;
+      
+      db.channel('admin-package-updates')
+        .on('postgres_changes', 
+          { event: 'INSERT', schema: 'public', table: 'packages' }, 
+          (payload) => {
+            showAnnouncement("🚀 A new high-yield package was added! Check it out now.");
+            loadPackages();
+          }
+        )
+        .on('postgres_changes', 
+          { event: 'UPDATE', schema: 'public', table: 'packages' }, 
+          () => {
+            loadPackages();
+          }
+        )
+        .subscribe();
+    }
+
+    // 3. Real-time System Pause, Auto-Resume & Countdown Logic
+    async function checkSystemPauseStatus() {
+      const db = getSupabaseClient();
+      if (!db) return false;
+
+      try {
+        // First try the 'settings' table used by admin panel
+        let { data, error } = await db.from('settings').select('*').single();
+        
+        // Fallback to 'system_settings' if empty/error
+        if (error || !data) {
+          const fallback = await db.from('system_settings').select('*').single();
+          data = fallback.data;
+        }
+
+        if (!data) return false;
+
+        evaluateSystemStatus(data);
+        return isSystemPaused;
+      } catch (e) {
+        console.error("Error checking system pause status:", e);
+        return false;
+      }
+    }
+
+    function evaluateSystemStatus(data) {
+      const now = new Date();
+      const currentTimeStr = now.toTimeString().split(' ')[0];
+      
+      let pausedByHours = false;
+      if (data.opening_time && data.closing_time) {
+        if (data.opening_time < data.closing_time) {
+          pausedByHours = (currentTimeStr < data.opening_time || currentTimeStr >= data.closing_time);
+        } else {
+          pausedByHours = (currentTimeStr < data.opening_time && currentTimeStr >= data.closing_time);
+        }
+      }
+
+      // Check both system_paused (Admin Panel) and is_paused
+      const isPausedInDb = (data.system_paused === true || data.system_paused === 'true' || data.is_paused === true || data.is_paused === 'true');
+      isSystemPaused = isPausedInDb || pausedByHours;
+
+      if (isSystemPaused) {
+        openModal('pauseModalOverlay');
+        startPauseCountdown(data.opening_time || "08:00:00");
+      } else {
+        closePauseModal();
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+        }
+      }
+
+      loadPackages();
+    }
+
+    function setupRealtimeSystemPauseUpdates() {
+      const db = getSupabaseClient();
+      if (!db) return;
+
+      // Realtime listener for 'settings' table
+      db.channel('system-pause-updates-settings')
+        .on('postgres_changes', 
+          { event: 'UPDATE', schema: 'public', table: 'settings' }, 
+          (payload) => {
+            if (payload.new) {
+              evaluateSystemStatus(payload.new);
+            }
+          }
+        )
+        .subscribe();
+
+      // Realtime listener for legacy 'system_settings' table
+      db.channel('system-pause-updates-legacy')
+        .on('postgres_changes', 
+          { event: 'UPDATE', schema: 'public', table: 'system_settings' }, 
+          (payload) => {
+            if (payload.new) {
+              evaluateSystemStatus(payload.new);
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    function startPauseCountdown(openingTimeStr) {
+      if (countdownInterval) clearInterval(countdownInterval);
+
+      countdownInterval = setInterval(() => {
+        const now = new Date();
+        const [targetHours, targetMinutes, targetSeconds] = openingTimeStr.split(':').map(Number);
+        
+        let target = new Date(now);
+        target.setHours(targetHours, targetMinutes, targetSeconds || 0, 0);
+
+        if (target <= now) {
+          target.setDate(target.getDate() + 1);
+        }
+
+        const diff = target - now;
+        if (diff <= 0) {
+          clearInterval(countdownInterval);
+          document.getElementById('pauseCountdownTimer').innerText = "00:00:00";
+          checkSystemPauseStatus();
+          return;
+        }
+
+        const hrs = String(Math.floor((diff / (1000 * 60 * 60)) % 24)).padStart(2, '0');
+        const mins = String(Math.floor((diff / (1000 * 60)) % 60)).padStart(2, '0');
+        const secs = String(Math.floor((diff / 1000) % 60)).padStart(2, '0');
+
+        document.getElementById('pauseCountdownTimer').innerText = `${hrs}:${mins}:${secs}`;
+      }, 1000);
+    }
+
+    // 4. Fetch and Render Packages
+    async function loadPackages() {
+      const grid = document.getElementById('packageGrid');
+      if (!grid) return;
+
+      const db = getSupabaseClient();
+      if (!db) {
+        grid.innerHTML = '<div class="empty-state">Unable to initialize database client.</div>';
+        return;
+      }
+
+      try {
+        const { data: packages, error } = await db
+          .from('packages')
+          .select('*')
+          .order('package_price', { ascending: true });
+
+        if (error) {
+          console.error("Supabase Query Error:", error);
+          grid.innerHTML = `<div class="empty-state">Error loading packages: ${error.message}</div>`;
+          return;
+        }
+
+        if (!packages || packages.length === 0) {
+          grid.innerHTML = '<div class="empty-state">No investment packages currently available.</div>';
+          return;
+        }
+
+        grid.innerHTML = packages.map(pkg => {
+          const price = pkg.package_price ?? pkg.minimum_amount ?? pkg.price ?? pkg.amount ?? 0;
+          const dailyYield = pkg.daily_amount ?? pkg.daily_return ?? pkg.daily_yield ?? pkg.daily_income ?? 0;
+          const duration = pkg.duration_days ?? pkg.duration ?? pkg.days ?? 1;
+          const totalReturn = pkg.total_return ?? ((dailyYield * duration) + (pkg.return_principal ? price : 0));
+          const withdrawalFreq = pkg.withdrawal_frequency || 'daily';
+
+          let withdrawalLabel = 'Daily';
+          if (withdrawalFreq === 'weekly') withdrawalLabel = 'Weekly';
+          if (withdrawalFreq === 'end_of_term') withdrawalLabel = `After ${duration} Days`;
+
+          const canAfford = userBalance >= price;
+
+          return `
+            <div class="package-card">
+              <div>
+                <div class="package-name">${pkg.name || 'Package'}</div>
+                <div class="package-price">UGX ${Number(price).toLocaleString()}</div>
+                <div class="package-duration">${duration} Days Plan</div>
+                <ul class="package-details">
+                  <li>Daily Amount: <span>UGX ${Number(dailyYield).toLocaleString()}</span></li>
+                  <li>Total Return: <span>UGX ${Number(totalReturn).toLocaleString()}</span></li>
+                  <li>Withdrawal Rule: <span style="color: var(--gold);">${withdrawalLabel}</span></li>
+                </ul>
+              </div>
+              <button 
+                class="btn-buy" 
+                id="buyBtn-${pkg.id}"
+                onclick="buyPackage('${pkg.id}', ${price})" 
+                ${(!canAfford || isSystemPaused) ? 'disabled' : ''}
+              >
+                ${isSystemPaused ? 'System Paused' : (!canAfford ? 'Insufficient Balance' : 'Purchase Plan')}
+              </button>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error("Error fetching packages:", err);
+        grid.innerHTML = '<div class="empty-state">Error loading packages.</div>';
+      }
+    }
+
+    // 5. Purchase Action (Fixed column error PGRST204 with local backup support)
+    async function buyPackage(packageId, price) {
+      if (isSystemPaused) {
+        openModal('pauseModalOverlay');
+        return;
+      }
+
+      if (userBalance < price) {
+        showToast("Insufficient balance in your wallet. Please top up to proceed.", "error");
+        return;
+      }
+
+      const btn = document.getElementById(`buyBtn-${packageId}`);
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Processing...";
+      }
+
+      const db = getSupabaseClient();
+      if (!db) return;
+
+      try {
+        const { data: userData } = await db.auth.getUser();
+        if (!userData || !userData.user) {
+          showToast("Please log in to purchase a package.", "error");
+          window.location.href = "login.html";
+          return;
+        }
+
+        const userId = userData.user.id;
+
+        // Fetch package details so we can store a complete record snapshot
+        const { data: pkgData } = await db.from('packages').select('*').eq('id', packageId).single();
+
+        // Try standard insertion with full metadata
+        let { error: purchaseError } = await db.from('user_packages').insert([
+          { 
+            user_id: userId, 
+            package_id: packageId,
+            package_name: pkgData ? pkgData.name : 'Investment Package',
+            price: price,
+            daily_yield: pkgData ? (pkgData.daily_amount ?? pkgData.daily_return ?? pkgData.daily_yield ?? 0) : 0,
+            created_at: new Date().toISOString()
+          }
+        ]);
+
+        // Fallback if specific columns don't exist yet in user_packages table
+        if (purchaseError && (purchaseError.code === 'PGRST204' || purchaseError.code === '42703')) {
+          const fallbackInsert = await db.from('user_packages').insert([
+            { user_id: userId, package_id: packageId }
+          ]);
+          purchaseError = fallbackInsert.error;
+        }
+
+        if (purchaseError) throw purchaseError;
+
+        const newBalance = userBalance - price;
+        const { error: profileError } = await db.from('Profiles').update({ balance: newBalance }).eq('id', userId);
+        
+        if (profileError) throw profileError;
+
+        // Save a backup directly to localStorage so purchased.html instantly detects it
+        const storageKey = `inval_purchases_${userId}`;
+        let localPurchases = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        localPurchases.unshift({
+          id: packageId,
+          package_name: pkgData ? pkgData.name : 'Investment Package',
+          price: price,
+          daily_yield: pkgData ? (pkgData.daily_amount ?? pkgData.daily_return ?? 0) : 0,
+          created_at: new Date().toISOString()
+        });
+        localStorage.setItem(storageKey, JSON.stringify(localPurchases));
+
+        userBalance = newBalance;
+        document.getElementById('userBalance').innerText = `UGX ${userBalance.toLocaleString()}`;
+        showToast("Package purchased successfully!", "success");
+        loadPackages();
+      } catch (err) {
+        console.error("Purchase error:", err);
+        showToast("Failed to complete purchase. Please try again.", "error");
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "Purchase Plan";
+        }
+      }
+    }
+
+    // Initialize Application
+    window.addEventListener('DOMContentLoaded', async () => {
+      await fetchUserBalance();
+      await checkSystemPauseStatus();
+      setupRealtimePackageUpdates();
+      setupRealtimeSystemPauseUpdates();
+      loadPackages();
+    });
+  </script>
+</body>
+</html>

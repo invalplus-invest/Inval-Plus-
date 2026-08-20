@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INVAL PLUS | Support</title>
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,900&display=swap");
+
+    :root {
+      --bg-color: #050505;
+      --card-bg: #111111;
+      --primary-red: #d30d18;
+      --dark-red: #800000;
+      --gold: #ffd700;
+      --green: #25D366;
+      --text-white: #ffffff;
+      --text-gray: #a0a0a0;
+      --border-color: #222;
+      --nav-bg: rgba(10, 10, 10, 0.95);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "Montserrat", sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-white);
+      padding-bottom: 95px;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 4%;
+      background-color: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 2px solid var(--primary-red);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .menu-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-white);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+    }
+
+    .menu-btn svg {
+      width: 26px;
+      height: 26px;
+      fill: var(--text-white);
+    }
+
+    /* Brand Logo Branding */
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .brand-logo-img {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+      border-radius: 8px;
+      filter: drop-shadow(0 0 8px rgba(211, 13, 24, 0.5));
+    }
+
+    .brand-text-wrapper {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
+    }
+
+    .brand-title-text {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      font-style: italic;
+      background: linear-gradient(180deg, #ffffff 30%, #a0a0a0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8));
+    }
+
+    .brand-title-text span {
+      background: linear-gradient(180deg, #ff3b47 20%, #990000 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-subtext {
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--gold);
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Sidebar Drawer */
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 1050;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -260px;
+      width: 260px;
+      height: 100%;
+      background: var(--card-bg);
+      border-right: 1px solid var(--border-color);
+      z-index: 1100;
+      padding: 20px;
+      transition: left 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 20px;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: var(--text-gray);
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sidebar-menu a {
+      color: var(--text-white);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 12px;
+      border-radius: 6px;
+      display: block;
+      transition: background 0.2s ease;
+    }
+
+    .sidebar-menu a:hover {
+      background: rgba(211, 13, 24, 0.15);
+      color: var(--gold);
+    }
+
+    /* Container */
+    .container {
+      max-width: 600px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+
+    .support-header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .support-header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .support-header h1 span {
+      color: var(--gold);
+    }
+
+    .support-header p {
+      color: var(--text-gray);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    /* Announcement Section */
+    .announcements-wrapper {
+      margin-bottom: 25px;
+    }
+
+    .announcement-card {
+      background: linear-gradient(135deg, rgba(211, 13, 24, 0.1), rgba(255, 215, 0, 0.05));
+      border: 1px solid rgba(255, 215, 0, 0.3);
+      border-left: 4px solid var(--gold);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .announcement-card .announcement-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .announcement-card .announcement-title {
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .announcement-card .announcement-date {
+      font-size: 10px;
+      color: var(--text-gray);
+    }
+
+    .announcement-card .announcement-body {
+      font-size: 12px;
+      color: var(--text-white);
+      line-height: 1.5;
+    }
+
+    /* Grid Options */
+    .btn-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 25px;
+    }
+
+    .btn-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-decoration: none;
+      color: var(--text-white);
+      font-weight: 700;
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      cursor: pointer;
+      width: 100%;
+    }
+
+    .btn-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .btn-card.wa {
+      border-color: rgba(37, 211, 102, 0.4);
+      color: var(--green);
+    }
+
+    .btn-card.call {
+      border-color: rgba(211, 13, 24, 0.4);
+      color: var(--primary-red);
+    }
+
+    .btn-card.email {
+      border-color: rgba(255, 215, 0, 0.4);
+      color: var(--gold);
+    }
+
+    .btn-card.channel {
+      border-color: rgba(0, 136, 204, 0.4);
+      color: #0088cc;
+    }
+
+    .btn-card svg {
+      width: 26px;
+      height: 26px;
+      fill: currentColor;
+    }
+
+    /* Online Agent Badge Indicator */
+    .agent-status {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text-gray);
+      margin-top: 2px;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      background-color: var(--green);
+      border-radius: 50%;
+      box-shadow: 0 0 6px var(--green);
+      animation: pulse-dot 1.5s infinite;
+    }
+    @keyframes pulse-dot {
+      0% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    /* FAQ Search Bar */
+    .faq-search-box {
+      width: 100%;
+      padding: 12px 15px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-white);
+      font-size: 13px;
+      outline: none;
+      margin-bottom: 15px;
+      transition: border-color 0.3s ease;
+    }
+    .faq-search-box:focus {
+      border-color: var(--gold);
+    }
+
+    /* FAQ Section */
+    .section-title {
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      color: var(--gold);
+    }
+
+    .faq-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+
+    .faq {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.3s ease;
+    }
+
+    .faq:hover {
+      border-color: var(--gold);
+    }
+
+    .faq-q {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-white);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .faq-a {
+      font-size: 12px;
+      color: var(--text-gray);
+      line-height: 1.5;
+      margin-top: 8px;
+      display: none;
+    }
+
+    .faq.active .faq-a {
+      display: block;
+    }
+
+    .faq-icon {
+      font-size: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .faq.active .faq-icon {
+      transform: rotate(45deg);
+    }
+
+    /* FAQ Helpful Feedback Widget */
+    .faq-feedback {
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-gray);
+    }
+    .feedback-btns {
+      display: flex;
+      gap: 6px;
+    }
+    .fb-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      color: var(--text-white);
+      padding: 3px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 10px;
+      transition: all 0.2s;
+    }
+    .fb-btn:hover {
+      border-color: var(--gold);
+      color: var(--gold);
+    }
+
+    /* Support Ticket Form Card */
+    .ticket-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 10px;
+      margin-bottom: 25px;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-gray);
+      margin-bottom: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: #080808;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      color: var(--text-white);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus {
+      border-color: var(--gold);
+    }
+    .form-textarea {
+      resize: vertical;
+      min-height: 90px;
+    }
+    .btn-action {
+      width: 100%;
+      background: linear-gradient(180deg, var(--primary-red), var(--dark-red));
+      color: var(--text-white);
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: all 0.3s ease;
+      margin-top: 4px;
+    }
+    .btn-action:hover {
+      background: linear-gradient(180deg, #ff1a25, #990000);
+      box-shadow: 0 4px 15px rgba(211, 13, 24, 0.4);
+    }
+
+    /* Recent User Tickets List */
+    .user-tickets-list {
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .user-ticket-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    .ticket-item-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+    .ticket-status-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .ticket-status-badge.open {
+      background: rgba(255, 215, 0, 0.15);
+      color: var(--gold);
+      border: 1px solid rgba(255, 215, 0, 0.3);
+    }
+    .ticket-status-badge.resolved {
+      background: rgba(46, 204, 113, 0.15);
+      color: #2ecc71;
+      border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+
+    /* Fixed Bottom Navigation Bar */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 70px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      z-index: 1000;
+      box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.8);
+      padding: 0 8px;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: var(--text-gray);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: capitalize;
+      letter-spacing: 0.3px;
+      flex: 1;
+      height: 100%;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-icon-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 28px;
+      border-radius: 14px;
+      margin-bottom: 4px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      transition: transform 0.3s ease, stroke 0.3s ease;
+    }
+
+    .nav-item::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 0%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary-red), var(--gold));
+      border-radius: 0 0 4px 4px;
+      transition: width 0.3s ease;
+    }
+
+    .nav-item.active {
+      color: var(--text-white);
+    }
+
+    .nav-item.active::before {
+      width: 50%;
+    }
+
+    .nav-item.active .nav-icon-wrapper {
+      background: rgba(211, 13, 24, 0.25);
+      box-shadow: 0 0 12px rgba(211, 13, 24, 0.4);
+    }
+
+    .nav-item.active svg {
+      stroke: var(--primary-red);
+      transform: translateY(-1px) scale(1.08);
+    }
+
+    .nav-item:hover:not(.active) {
+      color: var(--gold);
+    }
+
+    .nav-item:hover:not(.active) svg {
+      transform: translateY(-2px);
+      stroke: var(--gold);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header>
+    <div class="header-left">
+      <button class="menu-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+        </svg>
+      </button>
+      
+      <a href="packages.html" class="brand-title">
+        <img src="logo.png" alt="Inval Plus Logo" class="brand-logo-img" onerror="this.onerror=null; this.src='assets/logo.png';">
+        <div class="brand-text-wrapper">
+          <span class="brand-title-text">INVAL <span>PLUS</span></span>
+          <span class="brand-subtext">INVESTMENTS</span>
+        </div>
+      </a>
+    </div>
+  </header>
+
+  <!-- Sidebar Overlay & Drawer -->
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="packages.html" class="brand-title">
+        <img src="logo.png" alt="Inval Plus Logo" class="brand-logo-img" onerror="this.onerror=null; this.src='assets/logo.png';">
+        <div class="brand-text-wrapper">
+          <span class="brand-title-text">INVAL <span>PLUS</span></span>
+          <span class="brand-subtext">INVESTMENTS</span>
+        </div>
+      </a>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="purchased.html">Purchased</a></li>
+      <li><a href="wallet.html">Wallet</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="support.html">Support</a></li>
+      <li><a href="faqs.html">FAQs</a></li>
+      <li><a href="terms.html">Terms and Conditions</a></li>
+    </ul>
+  </div>
+
+  <!-- Main Container -->
+  <div class="container">
+    
+    <div class="support-header">
+      <h1>Help & <span>Support</span></h1>
+      <p>Need help with deposits, packages, or withdrawals? Reach our team 24/7.</p>
+    </div>
+
+    <!-- Admin Announcements Banner -->
+    <div id="announcementsContainer" class="announcements-wrapper"></div>
+
+    <!-- Contact Grid -->
+    <div class="btn-grid">
+      <!-- WhatsApp Direct -->
+      <a href="https://wa.me/256740986148?text=Hello%20INVAL%20PLUS%20Support,%20I%20need%20assistance." target="_blank" class="btn-card wa">
+        <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.5 15.3L2 22l4.8-1.4A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-3 1 .9-2.9-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8s-.4-.1-.5.1-.7.8-.8 1-.2.2-.4.1a6.3 6.3 0 0 1-2.9-1.8 7 7 0 0 1-1.2-1.5c-.1-.2 0-.3.1-.4l.3-.4c.1-.1.2-.2.2-.4s0-.3-.1-.4-.5-1.3-.7-1.8c-.2-.4-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3a2.5 2.5 0 0 0-.8 1.8c0 1.1.8 2.2.9 2.3s1.8 2.8 4.4 3.9c.6.3 1.1.4 1.5.3a2.5 2.5 0 0 0 1.6-1.1c.2-.4.2-.8.1-.9s-.3-.2-.5-.3z"/></svg>
+        <span>WhatsApp Admin<br>0740986148</span>
+        <div class="agent-status"><span class="status-dot"></span> Online 24/7</div>
+      </a>
+
+      <!-- Call Button (Safe Copy to Clipboard) -->
+      <button onclick="copyPhoneToClipboard()" class="btn-card call" style="border: 1px solid rgba(211, 13, 24, 0.4); background: var(--card-bg); width: 100%;">
+        <svg viewBox="0 0 24 24"><path d="M6.6 10.8a15.2 15.2 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>
+        <span>Call Admin<br>0740986148</span>
+        <div class="agent-status"><span class="status-dot"></span> Click to Copy</div>
+      </button>
+
+      <!-- Email Button (Safe Copy to Clipboard) -->
+      <button onclick="copyEmailToClipboard()" class="btn-card email" style="border: 1px solid rgba(255, 215, 0, 0.4); background: var(--card-bg); width: 100%;">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+        <span>Email Us<br>invalplus@gmail.com</span>
+        <div class="agent-status" style="color: var(--gold);">Click to Copy</div>
+      </button>
+
+      <!-- WhatsApp Channel -->
+      <a href="https://whatsapp.com/channel/0029VbDCLsTLCoX4tGBhnK1m" target="_blank" class="btn-card channel">
+        <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <span>WhatsApp Channel</span>
+      </a>
+    </div>
+
+    <!-- FAQs & Tickets Section -->
+    <h3 class="section-title">Frequently Asked Questions</h3>
+    <input type="text" id="faqSearch" class="faq-search-box" placeholder="🔍 Search questions (e.g., deposit, withdrawal)..." onkeyup="filterFaqs()" />
+    
+    <div class="faq-list" id="faqList">
+      <div class="faq" onclick="toggleFaq(this)">
+        <div class="faq-q">
+          <span>How do I make a deposit?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">
+          Go to the Wallet section, enter your deposit amount (minimum UGX 5,000) and your Mobile Money number, then approve the prompt on your phone.
+          <div class="faq-feedback" onclick="event.stopPropagation()">
+            <span>Was this helpful?</span>
+            <div class="feedback-btns">
+              <button class="fb-btn" onclick="submitFeedback(this, 'Yes')">👍 Yes</button>
+              <button class="fb-btn" onclick="submitFeedback(this, 'No')">👎 No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq" onclick="toggleFaq(this)">
+        <div class="faq-q">
+          <span>When can I request a withdrawal?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">
+          You can request a withdrawal directly from your Wallet whenever you have available funds. Withdrawals are processed to your Mobile Money number.
+          <div class="faq-feedback" onclick="event.stopPropagation()">
+            <span>Was this helpful?</span>
+            <div class="feedback-btns">
+              <button class="fb-btn" onclick="submitFeedback(this, 'Yes')">👍 Yes</button>
+              <button class="fb-btn" onclick="submitFeedback(this, 'No')">👎 No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq" onclick="toggleFaq(this)">
+        <div class="faq-q">
+          <span>How long do withdrawals take?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">
+          Most payouts are processed instantly or within a few hours. Under high server load, payouts take up to 24 hours.
+          <div class="faq-feedback" onclick="event.stopPropagation()">
+            <span>Was this helpful?</span>
+            <div class="feedback-btns">
+              <button class="fb-btn" onclick="submitFeedback(this, 'Yes')">👍 Yes</button>
+              <button class="fb-btn" onclick="submitFeedback(this, 'No')">👎 No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="faq" onclick="toggleFaq(this)">
+        <div class="faq-q">
+          <span>Can I purchase multiple investment packages?</span>
+          <span class="faq-icon">+</span>
+        </div>
+        <div class="faq-a">
+          Yes! You can purchase and run multiple active investment packages simultaneously. View active earnings in the Purchased tab.
+          <div class="faq-feedback" onclick="event.stopPropagation()">
+            <span>Was this helpful?</span>
+            <div class="feedback-btns">
+              <button class="fb-btn" onclick="submitFeedback(this, 'Yes')">👍 Yes</button>
+              <button class="fb-btn" onclick="submitFeedback(this, 'No')">👎 No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Direct Support Ticket Form & Ticket History -->
+    <h3 class="section-title">Submit Direct Ticket</h3>
+    <div class="ticket-card">
+      <div class="form-group">
+        <label>Subject</label>
+        <input type="text" id="ticketSubject" class="form-input" placeholder="e.g., General account inquiry" />
+      </div>
+      <div class="form-group">
+        <label>Message Details</label>
+        <textarea id="ticketMessage" class="form-textarea" placeholder="Describe your issue clearly..."></textarea>
+      </div>
+      <button class="btn-action" id="submitTicketBtn" onclick="submitSupportTicket()">Send Support Ticket</button>
+
+      <div style="margin-top: 20px;">
+        <label style="font-size: 11px; color: var(--text-gray); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px;">Your Recent Tickets</label>
+        <div id="userTicketsList" class="user-tickets-list">
+          <div style="font-size: 11px; color: var(--text-gray); text-align: center; padding: 10px;">Loading your tickets...</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="bottom-nav">
+    <a href="packages.html" class="nav-item">
+      <div class="nav-icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+          <polyline points="2 17 12 22 22 17"></polyline>
+          <polyline points="2 12 12 17 22 12"></polyline>
+        </svg>
+      </div>
+      <span>Packages</span>
+    </a>
+
+    <a href="purchased.html" class="nav-item">
+      <div class="nav-icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <path d="M16 10a4 4 0 01-8 0"></path>
+        </svg>
+      </div>
+      <span>Purchased</span>
+    </a>
+
+    <a href="wallet.html" class="nav-item">
+      <div class="nav-icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <rect x="2" y="4" width="20" height="16" rx="2"></rect>
+          <path d="M18 12h.01"></path>
+          <path d="M2 10h20"></path>
+        </svg>
+      </div>
+      <span>Wallet</span>
+    </a>
+
+    <a href="profile.html" class="nav-item">
+      <div class="nav-icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <span>Profile</span>
+    </a>
+
+    <a href="support.html" class="nav-item active">
+      <div class="nav-icon-wrapper">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 18v-6a9 9 0 0118 0v6"></path>
+          <path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"></path>
+        </svg>
+      </div>
+      <span>Support</span>
+    </a>
+  </nav>
+
+  <script>
+    const SUPABASE_URL = "https://tbxacrdbqpasphlktzkp.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRieGFjcmRicXBhc3BobGt0emtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3regxMjkwNTAsImV4cCI6MjEwMTcwNTA1MH0.9zUOBhxwPL2O4RPi-sKHKruYsejZvKxGS4E7l_L_AG0";
+    let supabaseClient = null;
+    let currentUser = null;
+
+    // Safely copy phone number for webview compatibility
+    function copyPhoneToClipboard() {
+      const phone = "+256740986148";
+      navigator.clipboard.writeText(phone).then(() => {
+        alert("📞 Phone number copied: " + phone + "\n\nYou can now paste it into your phone dialer or message us on WhatsApp!");
+      }).catch(() => {
+        alert("Admin Phone Number: " + phone);
+      });
+    }
+
+    // Safely copy email for webview compatibility
+    function copyEmailToClipboard() {
+      const email = "invalplus@gmail.com";
+      navigator.clipboard.writeText(email).then(() => {
+        alert("📧 Email copied: " + email + "\n\nYou can paste this into your email application or use our direct support ticket form below!");
+      }).catch(() => {
+        alert("Support Email: " + email);
+      });
+    }
+
+    function toggleSidebar() {
+      document.getElementById("sidebar").classList.toggle("active");
+      document.getElementById("sidebarOverlay").classList.toggle("active");
+    }
+
+    function toggleFaq(element) {
+      element.classList.toggle("active");
+    }
+
+    // FAQ Search Filter
+    function filterFaqs() {
+      const query = document.getElementById('faqSearch').value.toLowerCase();
+      const faqs = document.querySelectorAll('.faq-list .faq');
+      faqs.forEach(faq => {
+        const text = faq.innerText.toLowerCase();
+        faq.style.display = text.includes(query) ? 'block' : 'none';
+      });
+    }
+
+    // FAQ Feedback Handler
+    function submitFeedback(btn, responseType) {
+      btn.parentElement.innerHTML = `<span style="color: var(--gold); font-weight: 600;">Thanks for your feedback! (${responseType})</span>`;
+    }
+
+    // Initialize Page & Verify Session
+    async function initPage() {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } else {
+        console.error("Supabase SDK failed to load.");
+        return;
+      }
+
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        
+        if (!session) {
+          window.location.href = "login.html";
+          return;
+        }
+
+        currentUser = session.user;
+
+        await loadAnnouncements();
+        await loadUserTickets();
+
+      } catch (err) {
+        console.error("Initialization error:", err);
+      }
+    }
+
+    // Fetch announcements created within the last 3 days only
+    async function loadAnnouncements() {
+      const container = document.getElementById('announcementsContainer');
+      if (!container) return;
+
+      try {
+        const threeDaysAgo = new Date();
+        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+        const thresholdIsoString = threeDaysAgo.toISOString();
+
+        const { data: announcements, error } = await supabaseClient
+          .from('announcements')
+          .select('*')
+          .gte('created_at', thresholdIsoString)
+          .order('created_at', { ascending: false });
+
+        if (error || !announcements || announcements.length === 0) {
+          container.innerHTML = '';
+          return;
+        }
+
+        container.innerHTML = announcements.map(item => `
+          <div class="announcement-card">
+            <div class="announcement-header">
+              <div class="announcement-title">📢 ${item.title || 'Notice'}</div>
+              <div class="announcement-date">${new Date(item.created_at).toLocaleDateString()}</div>
+            </div>
+            <div class="announcement-body">${item.message || item.content}</div>
+          </div>
+        `).join('');
+
+      } catch (err) {
+        console.warn("Announcements load bypassed:", err);
+        container.innerHTML = '';
+      }
+    }
+
+    // Submit Support Ticket to Supabase
+    async function submitSupportTicket() {
+      const subject = document.getElementById('ticketSubject').value.trim();
+      const message = document.getElementById('ticketMessage').value.trim();
+      const btn = document.getElementById('submitTicketBtn');
+
+      if (!subject || !message) {
+        alert("Please fill in both the subject and message fields.");
+        return;
+      }
+
+      try {
+        btn.disabled = true;
+        btn.innerText = "SENDING TICKET...";
+
+        const { error } = await supabaseClient
+          .from('support_tickets')
+          .insert([
+            {
+              user_id: currentUser.id,
+              email: currentUser.email,
+              subject: subject,
+              message: message,
+              status: 'open'
+            }
+          ]);
+
+        if (error) throw error;
+
+        alert("✅ Support ticket submitted successfully!");
+        document.getElementById('ticketSubject').value = '';
+        document.getElementById('ticketMessage').value = '';
+        
+        await loadUserTickets();
+      } catch (err) {
+        console.error("Support ticket error:", err);
+        alert("Failed to submit ticket: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Send Support Ticket";
+      }
+    }
+
+    // Load User's Previous Support Tickets
+    async function loadUserTickets() {
+      const listContainer = document.getElementById('userTicketsList');
+      if (!listContainer || !currentUser) return;
+
+      try {
+        const { data: tickets, error } = await supabaseClient
+          .from('support_tickets')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (error || !tickets || tickets.length === 0) {
+          listContainer.innerHTML = `<div style="font-size: 11px; color: var(--text-gray); text-align: center; padding: 10px;">No support tickets submitted yet.</div>`;
+          return;
+        }
+
+        listContainer.innerHTML = tickets.map(t => {
+          const statusClass = (t.status || 'open').toLowerCase() === 'resolved' ? 'resolved' : 'open';
+          const dateStr = t.created_at ? new Date(t.created_at).toLocaleDateString() : 'Recent';
+          return `
+            <div class="user-ticket-item">
+              <div class="ticket-item-header">
+                <span>${t.subject || 'Support Request'}</span>
+                <span class="ticket-status-badge ${statusClass}">${t.status || 'Open'}</span>
+              </div>
+              <div style="font-size: 11px; color: var(--text-gray); margin-bottom: 4px;">${t.message}</div>
+              <div style="font-size: 9px; color: #777; text-align: right;">${dateStr}</div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.warn("Could not load user tickets:", err);
+        listContainer.innerHTML = `<div style="font-size: 11px; color: var(--text-gray); text-align: center; padding: 10px;">Unable to load recent tickets.</div>`;
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", initPage);
+  </script>
+</body>
+</html>

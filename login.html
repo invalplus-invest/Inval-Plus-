@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INVAL PLUS | Access Account</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap');
+
+    :root {
+      --bg-color: #050505;
+      --card-bg: rgba(17, 17, 17, 0.85); /* Glassmorphism background */
+      --primary-red: #d30d18;
+      --dark-red: #800000;
+      --gold: #ffd700;
+      --text-white: #ffffff;
+      --text-gray: #a0a0a0;
+      --border-color: #222222;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-white);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      padding: 35px 25px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.9);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--dark-red), var(--primary-red), var(--gold));
+    }
+
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 25px;
+    }
+
+    .logo-img {
+      max-width: 280px;
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+    }
+
+    .tab-container {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 25px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 12px;
+      background: none;
+      border: none;
+      color: var(--text-gray);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+    }
+
+    .tab-btn.active {
+      color: var(--gold);
+      border-bottom: 2px solid var(--gold);
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-gray);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 14px;
+      background-color: #080808;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-white);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-group input:focus {
+      border-color: var(--primary-red);
+      box-shadow: 0 0 8px rgba(211, 13, 24, 0.2);
+    }
+
+    /* Password Toggle Icon */
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      top: 34px;
+      cursor: pointer;
+      color: var(--text-gray);
+      font-size: 12px;
+      user-select: none;
+    }
+
+    .toggle-password:hover {
+      color: var(--text-white);
+    }
+
+    .forgot-link {
+      display: block;
+      text-align: right;
+      font-size: 11px;
+      color: var(--text-gray);
+      text-decoration: none;
+      margin-top: -10px;
+      margin-bottom: 15px;
+      transition: color 0.3s;
+    }
+
+    .forgot-link:hover {
+      color: var(--gold);
+    }
+
+    .btn-submit {
+      background: linear-gradient(180deg, var(--primary-red), var(--dark-red));
+      color: var(--text-white);
+      border: none;
+      padding: 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 10px;
+      transition: background 0.3s ease, transform 0.1s ease;
+    }
+
+    .btn-submit:hover {
+      background: linear-gradient(180deg, #ff1a25, #990000);
+    }
+    
+    .btn-submit:active {
+      transform: scale(0.98);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .form-section {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .form-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .info-note {
+      font-size: 11px;
+      color: var(--gold);
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    /* Toast Notifications */
+    .toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: #1a1a1a;
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border-left: 4px solid var(--primary-red);
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .toast.success { border-left-color: #28a745; }
+    .toast.error { border-left-color: var(--primary-red); }
+    .toast.info { border-left-color: var(--gold); }
+  </style>
+</head>
+<body>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="auth-card">
+    <div class="logo-container">
+      <img src="logo.png" alt="INVAL PLUS - Where Investment Meets Opportunity" class="logo-img" id="mainLogo" />
+    </div>
+
+    <div class="tab-container">
+      <button type="button" class="tab-btn active" id="loginTabBtn" onclick="switchTab('login')">Login</button>
+      <button type="button" class="tab-btn" id="registerTabBtn" onclick="switchTab('register')">Register</button>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <form id="loginForm" class="form-section active" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label for="loginEmail">Email Address</label>
+        <input type="email" id="loginEmail" required placeholder="Enter your email" />
+      </div>
+      <div class="form-group">
+        <label for="loginPassword">Password</label>
+        <input type="password" id="loginPassword" required placeholder="Enter your password" />
+        <span class="toggle-password" onclick="togglePassword('loginPassword', this)">SHOW</span>
+      </div>
+      
+      <a href="#" class="forgot-link" onclick="handleResetPassword()">Forgot Password?</a>
+      
+      <button type="submit" class="btn-submit" id="btnLogin">Login</button>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="registerForm" class="form-section" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label for="regFullName">Full Name</label>
+        <input type="text" id="regFullName" required placeholder="Enter full name" />
+      </div>
+      <div class="form-group">
+        <label for="regPhone">Mobile Number</label>
+        <input type="tel" id="regPhone" required placeholder="e.g. 0700000000" />
+      </div>
+      <div class="form-group">
+        <label for="regEmail">Email Address</label>
+        <input type="email" id="regEmail" required placeholder="Enter email" />
+      </div>
+      <div class="form-group">
+        <label for="regPassword">Password</label>
+        <input type="password" id="regPassword" required placeholder="Create password" minlength="6" />
+        <span class="toggle-password" onclick="togglePassword('regPassword', this)">SHOW</span>
+      </div>
+      <button type="submit" class="btn-submit" id="btnRegister">Create Account</button>
+      <p class="info-note">★ Receive UGX 1,000 bonus upon registration!</p>
+    </form>
+  </div>
+
+  <script>
+    // -------------------------------------------------------------
+    // 1. SUPABASE CREDENTIALS + ADMIN EMAIL
+    // -------------------------------------------------------------
+    const SUPABASE_URL = "https://tbxacrdbqpasphlktzkp.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRieGFjcmRicXBhc3BobGt0emtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMjkwNTAsImV4cCI6MjEwMTcwNTA1MH0.9zUOBhxwPL2O4RPi-sKHKruYsejZvKxGS4E7l_L_AG0";
+    const ADMIN_EMAIL = "norris1@gmail.com"; 
+
+    let supabaseClient = null;
+
+    // Toast Notification Function
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerText = message;
+      
+      container.appendChild(toast);
+      
+      setTimeout(() => toast.classList.add('show'), 10);
+      
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      try {
+        if (window.supabase && typeof window.supabase.createClient === 'function') {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          console.log("Supabase Client initialized successfully.");
+        } else {
+          showToast("System failed to load. Please refresh.", "error");
+        }
+      } catch (err) {
+        console.error("Initialization error:", err);
+      }
+    });
+
+    // -------------------------------------------------------------
+    // 2. UI INTERACTIONS
+    // -------------------------------------------------------------
+    function switchTab(tab) {
+      const loginForm = document.getElementById('loginForm');
+      const registerForm = document.getElementById('registerForm');
+      const loginBtn = document.getElementById('loginTabBtn');
+      const registerBtn = document.getElementById('registerTabBtn');
+
+      if (tab === 'login') {
+        loginForm.classList.add('active');
+        registerForm.classList.remove('active');
+        loginBtn.classList.add('active');
+        registerBtn.classList.remove('active');
+      } else {
+        registerForm.classList.add('active');
+        loginForm.classList.remove('active');
+        registerBtn.classList.add('active');
+        loginBtn.classList.remove('active');
+      }
+    }
+
+    function togglePassword(inputId, element) {
+      const input = document.getElementById(inputId);
+      if (input.type === "password") {
+        input.type = "text";
+        element.innerText = "HIDE";
+      } else {
+        input.type = "password";
+        element.innerText = "SHOW";
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 3. LOGIN HANDLER 
+    // -------------------------------------------------------------
+    async function handleLogin(e) {
+      e.preventDefault();
+      if (!supabaseClient) return showToast("System initializing...", "error");
+
+      const submitBtn = document.getElementById('btnLogin');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Authenticating...";
+
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const password = document.getElementById('loginPassword').value;
+
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+        if (error) {
+          showToast("Login Failed: " + error.message, "error");
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Login";
+          return;
+        }
+
+        showToast("Login successful!", "success");
+        setTimeout(() => {
+          window.location.href = email === ADMIN_EMAIL ? "admin.html" : "packages.html";
+        }, 1000);
+
+      } catch (err) {
+        showToast("Unexpected error: " + err.message, "error");
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Login";
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 4. REGISTER HANDLER
+    // -------------------------------------------------------------
+    async function handleRegister(e) {
+      e.preventDefault();
+      if (!supabaseClient) return showToast("System initializing...", "error");
+
+      const submitBtn = document.getElementById('btnRegister');
+      submitBtn.disabled = true;
+      submitBtn.innerText = "Creating Account...";
+
+      const fullName = document.getElementById('regFullName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const email = document.getElementById('regEmail').value.trim().toLowerCase();
+      const password = document.getElementById('regPassword').value;
+
+      try {
+        const { data: authData, error: authError } = await supabaseClient.auth.signUp({ 
+          email, 
+          password,
+          options: { data: { full_name: fullName, phone: phone } }
+        });
+
+        if (authError) {
+          showToast("Registration Failed: " + authError.message, "error");
+          submitBtn.disabled = false;
+          submitBtn.innerText = "Create Account";
+          return;
+        }
+
+        const userId = authData.user ? authData.user.id : null;
+
+        if (userId) {
+          const { error: profileError } = await supabaseClient.from('Profiles').insert([
+            { 
+              id: userId, 
+              full_name: fullName, 
+              email: email, 
+              phone: phone,
+              balance: 1000, 
+              status: 'active'
+            }
+          ]);
+
+          if (profileError) {
+            console.error("Profile creation warning:", profileError.message);
+          }
+        }
+
+        showToast("Account created! UGX 1,000 added. Please login.", "success");
+        switchTab('login');
+        document.getElementById('loginEmail').value = email;
+      } catch (err) {
+        showToast("Registration error: " + err.message, "error");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "Create Account";
+      }
+    }
+
+    // -------------------------------------------------------------
+    // 5. FORGOT PASSWORD HANDLER
+    // -------------------------------------------------------------
+    async function handleResetPassword() {
+      if (!supabaseClient) return showToast("System initializing...", "error");
+      
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      
+      if (!email) {
+        return showToast("Please enter your email address in the login form first.", "info");
+      }
+
+      showToast("Sending reset link...", "info");
+      
+      try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/reset-password.html',
+        });
+        
+        if (error) {
+          showToast(error.message, "error");
+        } else {
+          showToast("Password reset link sent to your email!", "success");
+        }
+      } catch (err) {
+        showToast("Error: " + err.message, "error");
+      }
+    }
+  </script>
+</body>
+</html>

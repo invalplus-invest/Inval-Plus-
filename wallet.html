@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INVAL PLUS | Wallet</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,900&display=swap");
+    :root { 
+      --bg-color: #050505; 
+      --card-bg: #111111; 
+      --primary-red: #d30d18; 
+      --dark-red: #800000; 
+      --gold: #ffd700; 
+      --green: #2ecc71; 
+      --text-white: #ffffff; 
+      --text-gray: #a0a0a0; 
+      --border-color: #222222; 
+      --nav-bg: rgba(10, 10, 10, 0.95); 
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Montserrat", sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-white); padding-bottom: 95px; }
+    
+    /* HEADER */
+    header { display: flex; justify-content: space-between; align-items: center; padding: 10px 4%; background-color: rgba(0, 0, 0, 0.92); backdrop-filter: blur(12px); border-bottom: 2px solid var(--primary-red); position: sticky; top: 0; z-index: 100; }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .menu-btn { background: transparent; border: none; color: var(--text-white); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; }
+    .menu-btn svg { width: 26px; height: 26px; fill: var(--text-white); }
+    .brand-title { display: flex; align-items: center; gap: 8px; text-decoration: none; user-select: none; }
+    
+    /* LOGO STYLING */
+    .site-logo { height: 34px; width: auto; object-fit: contain; }
+    
+    .brand-text-wrapper { display: flex; flex-direction: column; line-height: 1; }
+    .brand-title-text { font-size: 19px; font-weight: 900; letter-spacing: 2px; font-style: italic; background: linear-gradient(180deg, #ffffff 30%, #a0a0a0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8)); }
+    .brand-title-text span { background: linear-gradient(180deg, #ff3b47 20%, #990000 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .brand-subtext { font-size: 7px; font-weight: 700; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-top: 2px; }
+    .wallet-badge { background: linear-gradient(135deg, #1f0000, #3d0000); border: 1px solid var(--gold); border-radius: 20px; padding: 5px 12px; display: flex; align-items: center; gap: 4px; font-size: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.15); }
+    .wallet-badge span { color: var(--gold); font-weight: 700; }
+
+    /* SIDEBAR */
+    .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1050; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .sidebar-overlay.active { opacity: 1; visibility: visible; }
+    .sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; background: var(--card-bg); border-right: 1px solid var(--border-color); z-index: 1100; padding: 20px; transition: left 0.3s ease; display: flex; flex-direction: column; }
+    .sidebar.active { left: 0; }
+    .sidebar-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+    .close-btn { background: none; border: none; color: var(--text-gray); font-size: 22px; cursor: pointer; }
+    .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .sidebar-menu a { color: var(--text-white); text-decoration: none; font-size: 14px; font-weight: 600; padding: 10px 12px; border-radius: 6px; display: block; }
+    .sidebar-menu a:hover { background: rgba(211, 13, 24, 0.15); color: var(--gold); }
+
+    /* CONTAINER & CARDS */
+    .container { max-width: 600px; margin: 25px auto; padding: 0 15px; }
+    .balance-card { background: linear-gradient(145deg, #180506, #111); border: 1px solid var(--primary-red); border-radius: 14px; padding: 24px; text-align: center; box-shadow: 0 8px 25px rgba(211, 13, 24, 0.2); margin-bottom: 25px; }
+    .balance-card .label { font-size: 12px; color: var(--text-gray); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .balance-card .amount { font-size: 32px; font-weight: 800; color: var(--gold); }
+    .action-tabs { display: flex; gap: 10px; background: var(--card-bg); padding: 6px; border-radius: 10px; border: 1px solid var(--border-color); margin-bottom: 20px; }
+    .tab-btn { flex: 1; padding: 12px; background: transparent; border: none; color: var(--text-gray); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; border-radius: 6px; cursor: pointer; }
+    .tab-btn.active { background: linear-gradient(180deg, var(--primary-red), var(--dark-red)); color: var(--text-white); box-shadow: 0 4px 12px rgba(211, 13, 24, 0.3); }
+    .form-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; display: none; margin-bottom: 30px; }
+    .form-card.active { display: block; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; font-size: 12px; color: var(--text-gray); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-input { width: 100%; padding: 12px 14px; background: #080808; border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-white); font-size: 14px; outline: none; }
+    .form-input:focus { border-color: var(--gold); }
+
+    /* ADMIN PAYMENT INSTRUCTIONS CARD */
+    .admin-instruction-card {
+      background: rgba(255, 215, 0, 0.04);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+    .instruction-step-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .instruction-text {
+      font-size: 12px;
+      color: var(--text-gray);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+    .admin-number-box {
+      background: #080808;
+      padding: 10px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* CUSTOM FILE UPLOAD BOX */
+    .file-upload-box {
+      border: 2px dashed var(--border-color);
+      border-radius: 8px;
+      padding: 18px 12px;
+      text-align: center;
+      background: #080808;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .file-upload-box:hover {
+      border-color: var(--gold);
+      background: rgba(255, 215, 0, 0.03);
+    }
+    .file-upload-icon {
+      width: 28px;
+      height: 28px;
+      stroke: var(--gold);
+      fill: none;
+    }
+    .file-upload-text {
+      font-size: 12px;
+      color: var(--text-gray);
+      font-weight: 600;
+      word-break: break-all;
+    }
+    .file-preview {
+      max-height: 120px;
+      max-width: 100%;
+      border-radius: 6px;
+      margin-top: 6px;
+      display: none;
+      border: 1px solid var(--border-color);
+      object-fit: contain;
+    }
+
+    .btn-action { width: 100%; background: linear-gradient(180deg, var(--primary-red), var(--dark-red)); color: var(--text-white); border: none; padding: 14px; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
+    .history-title { font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; color: var(--gold); }
+    .history-list { display: flex; flex-direction: column; gap: 10px; }
+    .history-item { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+    .type-deposit { color: var(--green); font-weight:700; text-transform:uppercase; font-size:13px; }
+    .type-withdrawal { color: var(--primary-red); font-weight:700; text-transform:uppercase; font-size:13px; }
+
+    /* BOTTOM NAV */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: var(--nav-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--border-color); display: flex; justify-content: space-evenly; align-items: center; z-index: 1000; box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.8); padding: 0 8px; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-gray); font-size: 10px; font-weight: 600; text-transform: capitalize; letter-spacing: 0.3px; flex: 1; height: 100%; position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .nav-icon-wrapper { position: relative; display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; margin-bottom: 4px; transition: all 0.3s ease; }
+    .nav-item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.3s ease, stroke 0.3s ease; }
+    .nav-item::before { content: ""; position: absolute; top: 0; width: 0%; height: 3px; background: linear-gradient(90deg, var(--primary-red), var(--gold)); border-radius: 0 0 4px 4px; transition: width 0.3s ease; }
+    .nav-item.active { color: var(--text-white); }
+    .nav-item.active::before { width: 50%; }
+    .nav-item.active .nav-icon-wrapper { background: rgba(211, 13, 24, 0.25); box-shadow: 0 0 12px rgba(211, 13, 24, 0.4); }
+    .nav-item.active svg { stroke: var(--primary-red); transform: translateY(-1px) scale(1.08); }
+    .nav-item:hover:not(.active) { color: var(--gold); }
+    .nav-item:hover:not(.active) svg { transform: translateY(-2px); stroke: var(--gold); }
+  </style>
+</head>
+<body onload="initPage()">
+  <header>
+    <div class="header-left">
+      <button class="menu-btn" onclick="toggleSidebar()"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
+      <a href="packages.html" class="brand-title">
+        <img src="logo.png" alt="Logo" class="site-logo" />
+        <div class="brand-text-wrapper">
+          <span class="brand-title-text">INVAL <span>PLUS</span></span>
+          <span class="brand-subtext">INVESTMENTS</span>
+        </div>
+      </a>
+    </div>
+    <div class="wallet-badge">Balance: <span id="userBalance">UGX 0</span></div>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="packages.html" class="brand-title">
+        <img src="logo.png" alt="Logo" class="site-logo" />
+        <div class="brand-text-wrapper">
+          <span class="brand-title-text">INVAL <span>PLUS</span></span>
+          <span class="brand-subtext">INVESTMENTS</span>
+        </div>
+      </a>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="purchased.html">Purchased</a></li>
+      <li><a href="wallet.html">Wallet</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="support.html">Support</a></li>
+      <li><a href="faqs.html">FAQs</a></li>
+      <li><a href="terms.html">Terms and Conditions</a></li>
+    </ul>
+  </div>
+
+  <div class="container">
+    <div class="balance-card">
+      <div class="label">Available Wallet Balance</div>
+      <div class="amount" id="displayBalance">UGX 0</div>
+    </div>
+    
+    <div class="action-tabs">
+      <button class="tab-btn active" id="tabDepositBtn" onclick="switchTab('deposit')">Deposit</button>
+      <button class="tab-btn" id="tabWithdrawBtn" onclick="switchTab('withdraw')">Withdraw</button>
+    </div>
+
+    <!-- DEPOSIT FORM -->
+    <div class="form-card active" id="depositForm">
+      <!-- ADMIN PAYMENT INSTRUCTIONS -->
+      <div class="admin-instruction-card">
+        <div class="instruction-step-title">Step 1: Transfer Money to Admin</div>
+        <p class="instruction-text">
+          Send your deposit amount via Mobile Money to the official number below before submitting your request.
+        </p>
+        <div class="admin-number-box">
+          <div>
+            <span style="color: var(--text-gray);">MTN / Airtel:</span> 
+            <strong style="color: var(--text-white); margin-left: 6px;">+256 740986148</strong>
+          </div>
+          <span style="font-size: 11px; color: var(--gold); font-weight: 600;">INVAL PLUS</span>
+        </div>
+      </div>
+
+      <div class="instruction-step-title" style="margin-bottom: 12px;">Step 2: Submit Deposit Proof</div>
+
+      <div class="form-group">
+        <label>Amount (UGX)</label>
+        <input type="number" id="depositAmount" class="form-input" placeholder="Min 5,000" />
+      </div>
+      <div class="form-group">
+        <label>Your Mobile Money Number</label>
+        <input type="tel" id="depositPhone" class="form-input" placeholder="07XXXXXXXX" />
+      </div>
+      
+      <!-- FILE INPUT BOX -->
+      <div class="form-group">
+        <label>Payment Receipt / Screenshot Proof</label>
+        <label for="depositProof" class="file-upload-box" id="uploadBox">
+          <svg class="file-upload-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <div class="file-upload-text" id="uploadText">Tap to select receipt screenshot</div>
+          <img id="filePreview" class="file-preview" alt="Receipt Preview" />
+        </label>
+        <input type="file" id="depositProof" accept="image/*" style="display: none;" onchange="handleFileSelect(event)" />
+      </div>
+
+      <button class="btn-action" id="depositSubmitBtn" onclick="handleDeposit()">SUBMIT DEPOSIT REQUEST</button>
+    </div>
+
+    <!-- WITHDRAW FORM -->
+    <div class="form-card" id="withdrawForm">
+      <div class="form-group">
+        <label>Amount (UGX)</label>
+        <input type="number" id="withdrawAmount" class="form-input" placeholder="Min 10,000" />
+      </div>
+      <div class="form-group">
+        <label>Payout Mobile Money Number</label>
+        <input type="tel" id="withdrawPhone" class="form-input" placeholder="07XXXXXXXX" />
+      </div>
+      <button class="btn-action" id="withdrawSubmitBtn" onclick="handleWithdrawal()">REQUEST WITHDRAWAL</button>
+    </div>
+
+    <h3 class="history-title">Recent Transactions</h3>
+    <div class="history-list" id="transactionHistory"></div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav">
+    <a href="packages.html" class="nav-item"><div class="nav-icon-wrapper"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div><span>Packages</span></a>
+    <a href="purchased.html" class="nav-item"><div class="nav-icon-wrapper"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 01-8 0"></path></svg></div><span>Purchased</span></a>
+    <a href="wallet.html" class="nav-item active"><div class="nav-icon-wrapper"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M18 12h.01"></path><path d="M2 10h20"></path></svg></div><span>Wallet</span></a>
+    <a href="profile.html" class="nav-item"><div class="nav-icon-wrapper"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><span>Profile</span></a>
+    <a href="support.html" class="nav-item"><div class="nav-icon-wrapper"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6"></path><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"></path></svg></div><span>Support</span></a>
+  </nav>
+
+  <script>
+    const SUPABASE_URL = "https://tbxacrdbqpasphlktzkp.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRieGFjcmRicXBhc3BobGt0emtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMjkwNTAsImV4cCI6MjEwMTcwNTA1MH0.9zUOBhxwPL2O4RPi-sKHKruYsejZvKxGS4E7l_L_AG0";
+    
+    let supabaseClient = null;
+    let currentBalance = 0; 
+    let currentUser = null;
+    let userTable = 'Profiles';
+
+    function toggleSidebar() { 
+      document.getElementById("sidebar").classList.toggle("active"); 
+      document.getElementById("sidebarOverlay").classList.toggle("active"); 
+    }
+
+    function switchTab(tab) { 
+      document.getElementById('tabDepositBtn').classList.toggle('active', tab === 'deposit'); 
+      document.getElementById('tabWithdrawBtn').classList.toggle('active', tab === 'withdraw'); 
+      document.getElementById('depositForm').classList.toggle('active', tab === 'deposit'); 
+      document.getElementById('withdrawForm').classList.toggle('active', tab === 'withdraw'); 
+    }
+
+    /* FILE SELECTION & PREVIEW HANDLERS */
+    function handleFileSelect(event) {
+      const file = event.target.files[0];
+      const preview = document.getElementById("filePreview");
+      const text = document.getElementById("uploadText");
+      const box = document.getElementById("uploadBox");
+
+      if (file) {
+        text.innerText = "Selected: " + file.name;
+        text.style.color = "var(--gold)";
+        box.style.borderColor = "var(--gold)";
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.src = e.target.result;
+          preview.style.display = "block";
+        }
+        reader.readAsDataURL(file);
+      } else {
+        resetFilePreview();
+      }
+    }
+
+    function resetFilePreview() {
+      const preview = document.getElementById("filePreview");
+      const text = document.getElementById("uploadText");
+      const box = document.getElementById("uploadBox");
+      const fileInput = document.getElementById("depositProof");
+
+      if (fileInput) fileInput.value = "";
+      if (preview) { preview.src = ""; preview.style.display = "none"; }
+      if (text) { text.innerText = "Tap to select receipt screenshot"; text.style.color = "var(--text-gray)"; }
+      if (box) { box.style.borderColor = "var(--border-color)"; }
+    }
+
+    async function initPage() { 
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } else {
+        console.error("Supabase SDK failed to load.");
+        return;
+      }
+
+      const { data: { session } } = await supabaseClient.auth.getSession(); 
+      if (!session) return window.location.href = "login.html"; 
+      currentUser = session.user; 
+
+      await loadUserProfile(); 
+      await loadTransactions(); 
+    }
+
+    async function loadUserProfile() { 
+      let { data, error } = await supabaseClient.from('Profiles').select('balance').eq('id', currentUser.id).maybeSingle(); 
+      userTable = 'Profiles';
+
+      if (error || !data) {
+        const fallback = await supabaseClient.from('profiles').select('balance').eq('id', currentUser.id).maybeSingle();
+        data = fallback.data;
+        userTable = 'profiles';
+      }
+
+      currentBalance = Number(data?.balance || 0); 
+      const formatted = `UGX ${currentBalance.toLocaleString()}`; 
+      document.getElementById('userBalance').innerText = formatted; 
+      document.getElementById('displayBalance').innerText = formatted; 
+    }
+
+    async function loadTransactions() { 
+      const { data: deps } = await supabaseClient.from('deposits').select('*').eq('user_id', currentUser.id); 
+      const { data: wds } = await supabaseClient.from('withdrawals').select('*').eq('user_id', currentUser.id); 
+      
+      const all = [
+        ...(deps || []).map(d => ({ ...d, type: 'deposit' })), 
+        ...(wds || []).map(w => ({ ...w, type: 'withdrawal' }))
+      ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 10); 
+
+      document.getElementById('transactionHistory').innerHTML = all.length ? all.map(t => `
+        <div class="history-item">
+          <div>
+            <div class="type-${t.type}">${t.type}</div>
+            <div style="font-size:10px;color:var(--text-gray)">${new Date(t.created_at).toLocaleDateString()}</div>
+          </div>
+          <div style="text-align: right;">
+            <div>UGX ${Number(t.amount).toLocaleString()}</div>
+            <div style="font-size:10px;color:var(--text-gray)">${t.status}</div>
+          </div>
+        </div>
+      `).join('') : `<div style="text-align:center;padding:20px;color:var(--text-gray)">No transactions yet</div>`; 
+    }
+
+    async function handleDeposit() { 
+      const amount = Number(document.getElementById("depositAmount").value); 
+      const phone = document.getElementById("depositPhone").value.trim(); 
+      const proofFileInput = document.getElementById("depositProof");
+      const proofFile = proofFileInput ? proofFileInput.files[0] : null;
+      const submitBtn = document.getElementById("depositSubmitBtn");
+
+      if (!amount || amount < 5000) return alert("Minimum deposit is 5,000 UGX"); 
+      if (!phone) return alert("Please enter your mobile money phone number");
+      if (!proofFile) return alert("Please attach a screenshot or photo of your payment receipt");
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "UPLOADING PROOF...";
+
+        // 1. Upload proof image to Supabase Storage bucket ('deposit-proofs')
+        const fileExt = proofFile.name.split('.').pop();
+        const fileName = `${currentUser.id}_${Date.now()}.${fileExt}`;
+        const filePath = `receipts/${fileName}`;
+
+        const { data: uploadData, error: uploadError } = await supabaseClient
+          .storage
+          .from('deposit-proofs')
+          .upload(filePath, proofFile);
+
+        if (uploadError) {
+          throw new Error("Failed to upload screenshot: " + uploadError.message);
+        }
+
+        // 2. Get Public URL of the uploaded image
+        const { data: publicUrlData } = supabaseClient
+          .storage
+          .from('deposit-proofs')
+          .getPublicUrl(filePath);
+
+        const proofUrl = publicUrlData.publicUrl;
+
+        // 3. Insert deposit record with proof_url into 'deposits' table
+        const { error: depositError } = await supabaseClient
+          .from("deposits")
+          .insert([{ 
+            user_id: currentUser.id, 
+            amount: amount, 
+            phone: phone, 
+            proof_url: proofUrl,
+            status: 'pending' 
+          }]); 
+
+        if (depositError) {
+          throw new Error("Deposit request failed: " + depositError.message);
+        }
+
+        alert("✅ Deposit request submitted successfully! Admin will verify your receipt and approve shortly."); 
+        
+        // Clear fields and reset file preview
+        document.getElementById("depositAmount").value = "";
+        document.getElementById("depositPhone").value = "";
+        resetFilePreview();
+
+        loadTransactions(); 
+
+      } catch (err) {
+        console.error("Deposit submission error:", err);
+        alert(err.message || "An unexpected error occurred. Please try again.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "SUBMIT DEPOSIT REQUEST";
+      }
+    }
+
+    async function handleWithdrawal() { 
+      const amount = Number(document.getElementById("withdrawAmount").value); 
+      const phone = document.getElementById("withdrawPhone").value.trim(); 
+      const submitBtn = document.getElementById("withdrawSubmitBtn");
+
+      if (!amount || amount < 10000) return alert("Minimum withdrawal is 10,000 UGX"); 
+      if (!phone) return alert("Please enter a valid payout mobile money number");
+      if (amount > currentBalance) return alert("Insufficient balance to perform this withdrawal.");
+
+      // Calculate 10% withdrawal tax and net payout
+      const taxRate = 0.10;
+      const taxAmount = amount * taxRate;
+      const netPayout = amount - taxAmount;
+
+      // Show breakdown confirmation
+      const confirmationMessage = 
+        `--- WITHDRAWAL BREAKDOWN ---\n` +
+        `• Requested Amount: UGX ${amount.toLocaleString()}\n` +
+        `• Withdrawal Tax (10%): UGX ${taxAmount.toLocaleString()}\n` +
+        `• Net Payout (You Get): UGX ${netPayout.toLocaleString()}\n\n` +
+        `Do you want to proceed with this withdrawal?`;
+
+      if (!confirm(confirmationMessage)) return;
+
+      try {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "PROCESSING...";
+
+        // 1. Deduct full requested amount from user balance immediately (reserving funds)
+        const newBalance = currentBalance - amount;
+        const { error: profileError } = await supabaseClient
+          .from(userTable)
+          .update({ balance: newBalance })
+          .eq('id', currentUser.id);
+
+        if (profileError) {
+          throw new Error("Failed to reserve balance: " + profileError.message);
+        }
+
+        // 2. Insert withdrawal request including tax and net amount
+        const { error: withdrawError } = await supabaseClient
+          .from("withdrawals")
+          .insert([{ 
+            user_id: currentUser.id, 
+            amount: amount, 
+            tax: taxAmount,
+            net_amount: netPayout,
+            phone: phone, 
+            status: 'pending' 
+          }]);
+
+        if (withdrawError) {
+          // Refund the balance if withdrawal row creation failed
+          await supabaseClient
+            .from(userTable)
+            .update({ balance: currentBalance })
+            .eq('id', currentUser.id);
+
+          throw new Error("Withdrawal request failed: " + withdrawError.message);
+        }
+
+        alert(`✅ Withdrawal request submitted successfully!\nNet Payout: UGX ${netPayout.toLocaleString()}`);
+
+        // Clear fields and refresh
+        document.getElementById("withdrawAmount").value = "";
+        document.getElementById("withdrawPhone").value = "";
+
+        await loadUserProfile();
+        await loadTransactions();
+
+      } catch (err) {
+        console.error("Withdrawal submission error:", err);
+        alert(err.message || "An unexpected error occurred. Please try again.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerText = "REQUEST WITHDRAWAL";
+      }
+    }
+  </script>
+</body>
+</html>

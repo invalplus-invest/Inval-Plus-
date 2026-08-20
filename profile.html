@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>INVAL PLUS | Profile</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,900&display=swap");
+    :root { --bg-color: #050505; --card-bg: #111; --primary-red: #d30d18; --dark-red: #800000; --gold: #ffd700; --green: #2ecc71; --text-white: #ffffff; --text-gray: #a0a0a0; --border-color: #222; --nav-bg: rgba(10, 10, 10, 0.95); }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Montserrat", sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-white); padding-bottom: 95px; }
+
+    /* HEADER */
+    header { display: flex; justify-content: space-between; align-items: center; padding: 10px 4%; background-color: rgba(0, 0, 0, 0.92); backdrop-filter: blur(12px); border-bottom: 2px solid var(--primary-red); position: sticky; top: 0; z-index: 100; }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .menu-btn { background: transparent; border: none; color: var(--text-white); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 4px; }
+    .menu-btn svg { width: 26px; height: 26px; fill: var(--text-white); }
+    
+    /* LOGO BRANDING */
+    .brand-title { display: flex; align-items: center; gap: 8px; text-decoration: none; user-select: none; }
+    .brand-logo-img { width: 34px; height: 34px; object-fit: contain; border-radius: 8px; filter: drop-shadow(0 0 8px rgba(211, 13, 24, 0.5)); }
+    .brand-text-wrapper { display: flex; flex-direction: column; line-height: 1; }
+    .brand-title-text { font-size: 19px; font-weight: 900; letter-spacing: 2px; font-style: italic; background: linear-gradient(180deg, #ffffff 30%, #a0a0a0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.8)); }
+    .brand-title-text span { background: linear-gradient(180deg, #ff3b47 20%, #990000 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .brand-subtext { font-size: 7px; font-weight: 700; letter-spacing: 3px; color: var(--gold); text-transform: uppercase; margin-top: 2px; }
+    
+    .wallet-badge { background: linear-gradient(135deg, #1f0000, #3d0000); border: 1px solid var(--gold); border-radius: 20px; padding: 5px 12px; display: flex; align-items: center; gap: 4px; font-size: 12px; box-shadow: 0 0 10px rgba(255, 215, 0, 0.15); }
+    .wallet-badge span { color: var(--gold); font-weight: 700; }
+
+    /* SIDEBAR */
+    .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px); z-index: 1050; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
+    .sidebar-overlay.active { opacity: 1; visibility: visible; }
+    .sidebar { position: fixed; top: 0; left: -260px; width: 260px; height: 100%; background: var(--card-bg); border-right: 1px solid var(--border-color); z-index: 1100; padding: 20px; transition: left 0.3s ease; display: flex; flex-direction: column; }
+    .sidebar.active { left: 0; }
+    .sidebar-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 15px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px; }
+    .close-btn { background: none; border: none; color: var(--text-gray); font-size: 22px; cursor: pointer; }
+    .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .sidebar-menu a { color: var(--text-white); text-decoration: none; font-size: 14px; font-weight: 600; padding: 10px 12px; border-radius: 6px; display: block; transition: background 0.2s ease; }
+    .sidebar-menu a:hover { background: rgba(211, 13, 24, 0.15); color: var(--gold); }
+
+    /* MAIN CONTAINER */
+    .container { max-width: 600px; margin: 25px auto; padding: 0 15px; }
+    .profile-card { background: linear-gradient(145deg, #180506, #111); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; text-align: center; margin-bottom: 20px; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5); }
+    .avatar-wrapper { width: 80px; height: 80px; margin: 0 auto 15px; border-radius: 50%; background: linear-gradient(135deg, var(--primary-red), var(--gold)); display: flex; align-items: center; justify-content: center; padding: 3px; box-shadow: 0 0 20px rgba(211, 13, 24, 0.3); }
+    .avatar-inner { width: 100%; height: 100%; background: #111; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 800; color: var(--gold); }
+    .user-name { font-size: 18px; font-weight: 800; color: var(--text-white); margin-bottom: 2px; }
+    .user-email { font-size: 13px; font-weight: 600; color: var(--text-gray); margin-bottom: 10px; word-break: break-all; }
+    .id-badge { display: inline-flex; align-items: center; gap: 6px; background: #080808; border: 1px solid var(--border-color); padding: 4px 12px; border-radius: 20px; font-size: 11px; color: var(--gold); cursor: pointer; user-select: none; }
+    .id-badge:hover { border-color: var(--gold); }
+
+    .quick-actions { display: flex; gap: 12px; margin-bottom: 20px; }
+    .action-link-btn { flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-white); padding: 12px; border-radius: 10px; text-decoration: none; font-size: 12px; font-weight: 700; text-align: center; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; }
+    .action-link-btn:hover { border-color: var(--primary-red); color: var(--gold); }
+
+    .info-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; margin-bottom: 20px; }
+    .section-title { font-size: 12px; font-weight: 700; color: var(--gold); text-transform: uppercase; margin-bottom: 14px; letter-spacing: 0.5px; }
+    
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 11px; color: var(--text-gray); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+    .form-input, .form-select { width: 100%; padding: 10px 12px; background: #080808; border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-white); font-size: 13px; outline: none; transition: border-color 0.2s; }
+    .form-input:focus, .form-select:focus { border-color: var(--gold); }
+
+    .btn-action { width: 100%; background: linear-gradient(180deg, var(--primary-red), var(--dark-red)); color: var(--text-white); border: none; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s ease; margin-top: 6px; }
+    .btn-action:hover { background: linear-gradient(180deg, #ff1a25, #990000); box-shadow: 0 4px 15px rgba(211, 13, 24, 0.4); }
+    .btn-secondary { background: #1a1a1a; border: 1px solid var(--border-color); }
+    .btn-secondary:hover { background: #252525; }
+
+    .info-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+    .info-item:last-child { border-bottom: none; }
+    .info-label { color: var(--text-gray); font-weight: 500; }
+    .info-value { color: var(--text-white); font-weight: 600; }
+    .status-badge { background: rgba(46, 204, 113, 0.15); color: var(--green); padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; border: 1px solid rgba(46, 204, 113, 0.3); }
+
+    .referral-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px; margin-bottom: 20px; }
+    .referral-input-wrapper { display: flex; gap: 8px; margin-bottom: 12px; }
+    .referral-input { flex: 1; background: #080808; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; color: var(--text-gray); font-size: 12px; outline: none; }
+    .copy-btn { background: linear-gradient(180deg, var(--primary-red), var(--dark-red)); color: var(--text-white); border: none; padding: 0 16px; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase; }
+    
+    .share-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .btn-share { padding: 10px; border-radius: 8px; font-weight: 700; font-size: 11px; text-align: center; text-decoration: none; color: white; display: flex; align-items: center; justify-content: center; gap: 6px; text-transform: uppercase; }
+    .btn-whatsapp { background: #25D366; }
+    .btn-sms { background: #007AFF; }
+
+    .btn-logout { width: 100%; background: linear-gradient(180deg, var(--primary-red), var(--dark-red)); color: var(--text-white); border: none; padding: 14px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; }
+    .btn-logout:hover { background: linear-gradient(180deg, #ff1a25, #990000); box-shadow: 0 4px 15px rgba(211, 13, 24, 0.4); }
+
+    /* BOTTOM NAV */
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: 70px; background: var(--nav-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-top: 1px solid var(--border-color); display: flex; justify-content: space-evenly; align-items: center; z-index: 1000; box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.8); padding: 0 8px; }
+    .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-gray); font-size: 10px; font-weight: 600; text-transform: capitalize; letter-spacing: 0.3px; flex: 1; height: 100%; position: relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .nav-icon-wrapper { position: relative; display: flex; align-items: center; justify-content: center; width: 38px; height: 28px; border-radius: 14px; margin-bottom: 4px; transition: all 0.3s ease; }
+    .nav-item svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 0.3s ease, stroke 0.3s ease; }
+    .nav-item::before { content: ""; position: absolute; top: 0; width: 0%; height: 3px; background: linear-gradient(90deg, var(--primary-red), var(--gold)); border-radius: 0 0 4px 4px; transition: width 0.3s ease; }
+    .nav-item.active { color: var(--text-white); }
+    .nav-item.active::before { width: 50%; }
+    .nav-item.active .nav-icon-wrapper { background: rgba(211, 13, 24, 0.25); box-shadow: 0 0 12px rgba(211, 13, 24, 0.4); }
+    .nav-item.active svg { stroke: var(--primary-red); transform: translateY(-1px) scale(1.08); }
+    .nav-item:hover:not(.active) { color: var(--gold); }
+    .nav-item:hover:not(.active) svg { transform: translateY(-2px); stroke: var(--gold); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="header-left">
+      <button class="menu-btn" onclick="toggleSidebar()"><svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg></button>
+      <a href="packages.html" class="brand-title">
+        <img src="logo.png" alt="Inval Plus Logo" class="brand-logo-img" onerror="this.onerror=null; this.src='assets/logo.png';">
+        <div class="brand-text-wrapper">
+          <span class="brand-title-text">INVAL <span>PLUS</span></span>
+          <span class="brand-subtext">INVESTMENTS</span>
+        </div>
+      </a>
+    </div>
+    <div class="wallet-badge">Balance: <span id="userBalance">UGX 0</span></div>
+  </header>
+
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="packages.html" class="brand-title">
+        <img src="logo.png" alt="Inval Plus Logo" class="brand-logo-img" onerror="this.onerror=null; this.src='assets/logo.png';">
+        <div class="brand-text-wrapper">
+          <span class="brand-title-text">INVAL <span>PLUS</span></span>
+          <span class="brand-subtext">INVESTMENTS</span>
+        </div>
+      </a>
+      <button class="close-btn" onclick="toggleSidebar()">&times;</button>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="packages.html">Packages</a></li>
+      <li><a href="purchased.html">Purchased</a></li>
+      <li><a href="wallet.html">Wallet</a></li>
+      <li><a href="profile.html">Profile</a></li>
+      <li><a href="support.html">Support</a></li>
+      <li><a href="faqs.html">FAQs</a></li>
+      <li><a href="terms.html">Terms and Conditions</a></li>
+    </ul>
+  </div>
+
+  <div class="container">
+    <div class="profile-card">
+      <div class="avatar-wrapper"><div class="avatar-inner" id="avatarInitial">U</div></div>
+      <div class="user-name" id="profileName">User Account</div>
+      <div class="user-email" id="profileEmail">loading...</div>
+      <div class="id-badge" onclick="copyUid()"><span id="profileUid">ID: ---</span> 📋</div>
+    </div>
+
+    <div class="quick-actions">
+      <a href="wallet.html" class="action-link-btn">Deposit Funds</a>
+      <a href="wallet.html" class="action-link-btn">Withdraw Payout</a>
+    </div>
+
+    <div class="info-card">
+      <div class="info-item"><span class="info-label">Account Status</span><span class="status-badge">Active</span></div>
+      <div class="info-item"><span class="info-label">Joined Date</span><span class="info-value" id="profileJoined">---</span></div>
+      <div class="info-item"><span class="info-label">Wallet Balance</span><span class="info-value" id="profileBalance" style="color: var(--gold);">UGX 0</span></div>
+      <div class="info-item"><span class="info-label">Referral Bonus</span><span class="info-value" id="totalRefBonus" style="color: var(--gold);">UGX 0</span></div>
+      <div class="info-item"><span class="info-label">Security</span><span class="info-value">Protected (SSL)</span></div>
+    </div>
+
+    <!-- PROFILE & PAYOUT DETAILS EDITING -->
+    <div class="info-card">
+      <div class="section-title">Update Personal Details</div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="inputName" class="form-input" placeholder="Enter full name" />
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="inputPhone" class="form-input" placeholder="07XXXXXXXX" />
+      </div>
+      <button class="btn-action" id="saveProfileBtn" onclick="saveProfileDetails()">Save Profile</button>
+    </div>
+
+    <div class="info-card">
+      <div class="section-title">Withdrawal Credentials</div>
+      <div class="form-group">
+        <label>Preferred Payment Network</label>
+        <select id="payoutNetwork" class="form-select">
+          <option value="MTN">MTN Mobile Money</option>
+          <option value="AIRTEL">Airtel Money</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Payout Phone Number</label>
+        <input type="tel" id="payoutPhone" class="form-input" placeholder="07XXXXXXXX" />
+      </div>
+      <button class="btn-action btn-secondary" id="savePayoutBtn" onclick="savePayoutDetails()">Update Payout Method</button>
+    </div>
+
+    <div class="referral-card">
+      <div class="referral-title">Invite & Earn Referral Link</div>
+      <div class="referral-input-wrapper">
+        <input type="text" class="referral-input" id="referralLink" readonly />
+        <button class="copy-btn" onclick="copyReferral()">Copy</button>
+      </div>
+      <div class="share-grid">
+        <a id="whatsappShareBtn" href="#" target="_blank" class="btn-share btn-whatsapp">WhatsApp Share</a>
+        <a id="smsShareBtn" href="#" class="btn-share btn-sms">SMS Share</a>
+      </div>
+      <button class="btn-action" onclick="requestReferralWithdrawal()" style="margin-top: 12px;">Withdraw Referral Bonus Request</button>
+    </div>
+
+    <button class="btn-logout" onclick="handleLogout()">Sign Out</button>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="packages.html" class="nav-item"><div class="nav-icon-wrapper"><svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></div><span>Packages</span></a>
+    <a href="purchased.html" class="nav-item"><div class="nav-icon-wrapper"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 01-8 0"></path></svg></div><span>Purchased</span></a>
+    <a href="wallet.html" class="nav-item"><div class="nav-icon-wrapper"><svg viewBox="0 0 24 24"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="M18 12h.01"></path><path d="M2 10h20"></path></svg></div><span>Wallet</span></a>
+    <a href="profile.html" class="nav-item active"><div class="nav-icon-wrapper"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div><span>Profile</span></a>
+    <a href="support.html" class="nav-item"><div class="nav-icon-wrapper"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6"></path><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"></path></svg></div><span>Support</span></a>
+  </nav>
+
+  <script>
+    const SUPABASE_URL = "https://tbxacrdbqpasphlktzkp.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRieGFjcmRicXBhc3BobGt0emtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMjkwNTAsImV4cCI6MjEwMTcwNTA1MH0.9zUOBhxwPL2O4RPi-sKHKruYsejZvKxGS4E7l_L_AG0";
+    let supabaseClient = null;
+    let currentUser = null;
+    let activeTable = 'Profiles';
+
+    function toggleSidebar() { 
+      document.getElementById("sidebar").classList.toggle("active"); 
+      document.getElementById("sidebarOverlay").classList.toggle("active"); 
+    }
+
+    async function initPage() {
+      if (window.supabase && typeof window.supabase.createClient === 'function') {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      } else {
+        console.error("Supabase SDK failed to load.");
+        return;
+      }
+
+      const { data: { session }, error: sessionErr } = await supabaseClient.auth.getSession();
+      if (sessionErr || !session) return window.location.href = "login.html";
+      currentUser = session.user;
+
+      const refCode = currentUser.id.substring(0, 8).toUpperCase();
+      const refUrl = `${window.location.origin}/signup.html?ref=${refCode}`;
+
+      document.getElementById('profileEmail').innerText = currentUser.email || 'No Email';
+      document.getElementById('profileUid').innerText = `ID: ${currentUser.id.substring(0, 8)}...`;
+      document.getElementById('avatarInitial').innerText = (currentUser.email || 'U').charAt(0).toUpperCase();
+      document.getElementById('referralLink').value = refUrl;
+      document.getElementById('profileJoined').innerText = new Date(currentUser.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
+      const shareMsg = encodeURIComponent(`Join INVAL PLUS and grow your investment today! Sign up here: ${refUrl}`);
+      document.getElementById("whatsappShareBtn").href = `https://wa.me/?text=${shareMsg}`;
+      document.getElementById("smsShareBtn").href = `sms:?body=${shareMsg}`;
+
+      await loadUserProfile();
+    }
+
+    async function loadUserProfile() {
+      let balance = 0;
+      
+      const { data: walletData } = await supabaseClient
+        .from('wallets')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .maybeSingle();
+
+      if (walletData) {
+        balance = walletData.balance ?? walletData.amount ?? 0;
+      } else {
+        const { data: walletDataAlt } = await supabaseClient
+          .from('Wallets')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+        if (walletDataAlt) {
+          balance = walletDataAlt.balance ?? walletDataAlt.amount ?? 0;
+        }
+      }
+
+      let { data, error } = await supabaseClient.from('Profiles').select('*').eq('id', currentUser.id).maybeSingle();
+      if (error || !data) {
+        const fallback = await supabaseClient.from('profiles').select('*').eq('id', currentUser.id).maybeSingle();
+        data = fallback.data;
+        activeTable = 'profiles';
+      } else {
+        activeTable = 'Profiles';
+      }
+
+      if (balance === 0 && data?.balance) {
+        balance = data.balance;
+      }
+
+      const refBonus = data?.referral_bonus ?? data?.ref_bonus ?? 0;
+      const fullName = data?.full_name || data?.name || currentUser.email.split('@')[0] || 'User Account';
+
+      document.getElementById('userBalance').innerText = `UGX ${Number(balance).toLocaleString()}`;
+      document.getElementById('profileBalance').innerText = `UGX ${Number(balance).toLocaleString()}`;
+      document.getElementById('totalRefBonus').innerText = `UGX ${Number(refBonus).toLocaleString()}`;
+      document.getElementById('profileName').innerText = fullName;
+      document.getElementById('inputName').value = fullName;
+      document.getElementById('inputPhone').value = data?.phone || '';
+
+      if (data?.payout_network) document.getElementById('payoutNetwork').value = data.payout_network;
+      if (data?.payout_phone) document.getElementById('payoutPhone').value = data.payout_phone;
+    }
+
+    async function saveProfileDetails() {
+      const name = document.getElementById('inputName').value.trim();
+      const phone = document.getElementById('inputPhone').value.trim();
+      const btn = document.getElementById('saveProfileBtn');
+
+      if (!name) return alert("Please enter your name.");
+
+      try {
+        btn.disabled = true;
+        btn.innerText = "SAVING...";
+
+        let { error } = await supabaseClient
+          .from(activeTable)
+          .update({
+            full_name: name,
+            phone: phone
+          })
+          .eq('id', currentUser.id);
+
+        if (error && error.message.includes("column")) {
+          let fallback = await supabaseClient
+            .from(activeTable)
+            .update({
+              name: name,
+              phone: phone
+            })
+            .eq('id', currentUser.id);
+          if (fallback.error) throw fallback.error;
+        } else if (error) {
+          throw error;
+        }
+
+        document.getElementById('profileName').innerText = name;
+        alert("✅ Profile updated successfully!");
+      } catch (err) {
+        console.error("Profile save error:", err);
+        alert("Failed to update profile: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Save Profile";
+      }
+    }
+
+    async function savePayoutDetails() {
+      const network = document.getElementById('payoutNetwork').value;
+      const phone = document.getElementById('payoutPhone').value.trim();
+      const btn = document.getElementById('savePayoutBtn');
+
+      if (!phone) return alert("Please enter your payout phone number.");
+
+      try {
+        btn.disabled = true;
+        btn.innerText = "SAVING...";
+
+        const { error } = await supabaseClient
+          .from(activeTable)
+          .update({
+            payout_network: network,
+            payout_phone: phone
+          })
+          .eq('id', currentUser.id);
+
+        if (error) throw error;
+        alert("✅ Payout details updated successfully!");
+      } catch (err) {
+        console.error("Payout save error:", err);
+        alert("Failed to update payout method: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerText = "Update Payout Method";
+      }
+    }
+
+    async function requestReferralWithdrawal() {
+      const amountStr = prompt("Enter amount of Referral Bonus to withdraw (UGX):");
+      if (!amountStr) return;
+      const amount = Number(amountStr);
+
+      if (isNaN(amount) || amount <= 0) return alert("Please enter a valid amount.");
+
+      const network = document.getElementById('payoutNetwork').value;
+      const phone = document.getElementById('inputPhone').value || document.getElementById('payoutPhone').value;
+
+      if (!phone) return alert("Please fill out your phone number first.");
+
+      try {
+        const { error } = await supabaseClient
+          .from('withdrawals')
+          .insert([
+            {
+              user_id: currentUser.id,
+              email: currentUser.email,
+              amount: amount,
+              network: network,
+              phone: phone,
+              status: 'pending'
+            }
+          ]);
+
+        if (error) throw error;
+        alert("✅ Referral bonus withdrawal request sent successfully!");
+      } catch (err) {
+        console.error("Withdrawal error:", err);
+        alert("Failed to send request: " + err.message);
+      }
+    }
+
+    async function handleLogout() { 
+      if (confirm("Are you sure you want to sign out?")) {
+        if (supabaseClient) await supabaseClient.auth.signOut(); 
+        window.location.href = "login.html"; 
+      }
+    }
+    
+    function copyUid() { 
+      if (currentUser?.id) {
+        navigator.clipboard.writeText(currentUser.id); 
+        alert('User ID Copied!'); 
+      }
+    }
+    
+    function copyReferral() { 
+      const refInput = document.getElementById('referralLink');
+      if (refInput.value) {
+        navigator.clipboard.writeText(refInput.value); 
+        alert('Referral Link Copied!'); 
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", initPage);
+  </script>
+</body>
+</html>
