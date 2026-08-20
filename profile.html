@@ -237,7 +237,7 @@
       currentUser = session.user;
 
       const refCode = currentUser.id.substring(0, 8).toUpperCase();
-      const refUrl = `${window.location.origin}/signup.html?ref=${refCode}`;
+      const refUrl = `${window.location.origin}?ref=${refCode}`;
 
       document.getElementById('profileEmail').innerText = currentUser.email || 'No Email';
       document.getElementById('profileUid').innerText = `ID: ${currentUser.id.substring(0, 8)}...`;
