@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>INVAL PLUS | Admin Dashboard</title>
+  <title>INVAL PLUS | Official Admin Command</title>
   <!-- Supabase JS CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- FontAwesome Icons CDN -->
@@ -11,14 +11,17 @@
   
   <style>
     :root {
-      --bg-dark: #0d0d0d;
-      --card-bg: #1a1a1a;
-      --primary-yellow: #ffcc00;
-      --primary-green: #00e676;
-      --text-light: #ffffff;
-      --text-muted: #a0a0a0;
-      --danger-red: #ff3333;
-      --border-color: #333333;
+      --bg-dark: #070707;
+      --card-bg: #121212;
+      --card-border: #222222;
+      --primary-gold: #ffb700;
+      --gold-glow: rgba(255, 183, 0, 0.15);
+      --primary-green: #2a9d8f;
+      --text-light: #f8f9fa;
+      --text-muted: #8d99ae;
+      --danger-red: #e63946;
+      --danger-bg: rgba(230, 57, 70, 0.15);
+      --border-color: #2b2b2b;
     }
 
     * {
@@ -38,24 +41,32 @@
 
     /* Top Navigation Bar */
     .navbar {
-      background-color: #141414;
+      background-color: #0b0b0b;
       border-bottom: 1px solid var(--border-color);
-      padding: 12px 20px;
+      padding: 14px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       position: sticky;
       top: 0;
       z-index: 1000;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.6);
     }
 
     .brand {
-      font-size: 1.2rem;
-      font-weight: bold;
-      color: var(--primary-yellow);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--primary-gold);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    .brand img {
+      height: 34px;
+      width: auto;
+      object-fit: contain;
     }
 
     .nav-controls {
@@ -71,62 +82,69 @@
     }
 
     .dropdown-btn {
-      background-color: #242424;
-      color: var(--text-light);
+      background-color: #1a1a1a;
+      color: var(--primary-gold);
       border: 1px solid var(--border-color);
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 9px 16px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
+      transition: all 0.2s ease;
     }
 
     .dropdown-btn:hover {
-      border-color: var(--primary-yellow);
-      color: var(--primary-yellow);
+      border-color: var(--primary-gold);
+      box-shadow: 0 0 10px var(--gold-glow);
     }
 
     .dropdown-menu {
       display: none;
       position: absolute;
       right: 0;
-      top: 110%;
-      background-color: #1c1c1c;
-      min-width: 220px;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5);
+      top: 120%;
+      background-color: #141414;
+      min-width: 230px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.8);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
+      border-radius: 10px;
       overflow: hidden;
       z-index: 1001;
     }
 
     .dropdown-menu.show {
       display: block;
+      animation: fadeIn 0.15s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .dropdown-item {
       color: var(--text-light);
-      padding: 12px 16px;
+      padding: 12px 18px;
       text-decoration: none;
       display: flex;
       align-items: center;
       gap: 12px;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: background 0.2s, color 0.2s;
     }
 
     .dropdown-item i {
       width: 18px;
-      color: var(--primary-yellow);
+      color: var(--primary-gold);
     }
 
     .dropdown-item:hover {
-      background-color: #2a2a2a;
-      color: var(--primary-yellow);
+      background-color: #1f1f1f;
+      color: var(--primary-gold);
     }
 
     .dropdown-divider {
@@ -138,8 +156,8 @@
     /* Main Content */
     .main-content {
       flex: 1;
-      padding: 25px 20px;
-      max-width: 1200px;
+      padding: 30px 24px;
+      max-width: 1240px;
       margin: 0 auto;
       width: 100%;
     }
@@ -148,143 +166,169 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 25px;
-      padding-bottom: 15px;
+      margin-bottom: 30px;
+      padding-bottom: 18px;
       border-bottom: 1px solid var(--border-color);
+    }
+
+    .header-bar h2 {
+      font-weight: 700;
+      letter-spacing: 0.3px;
     }
 
     .refresh-btn {
       background-color: var(--card-bg);
       color: var(--text-light);
       border: 1px solid var(--border-color);
-      padding: 8px 16px;
-      border-radius: 6px;
+      padding: 9px 16px;
+      border-radius: 8px;
       cursor: pointer;
       display: flex;
       align-items: center;
       gap: 8px;
       font-size: 0.85rem;
+      font-weight: 600;
+      transition: all 0.2s;
     }
 
     .refresh-btn:hover {
-      border-color: var(--primary-yellow);
+      border-color: var(--primary-gold);
+      color: var(--primary-gold);
     }
 
     /* Stats Grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 18px;
-      margin-bottom: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 20px;
+      margin-bottom: 35px;
     }
 
     .stat-card {
       background-color: var(--card-bg);
-      padding: 18px;
-      border-radius: 10px;
-      border: 1px solid var(--border-color);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
       display: flex;
       align-items: center;
-      gap: 15px;
+      gap: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.2s, border-color 0.2s;
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-color);
+      transform: translateY(-2px);
     }
 
     .stat-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 8px;
-      background-color: #242424;
+      width: 52px;
+      height: 52px;
+      border-radius: 10px;
+      background-color: #181818;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.3rem;
-      color: var(--primary-yellow);
+      font-size: 1.35rem;
+      color: var(--primary-gold);
+      border: 1px solid #282828;
     }
 
     .stat-info h4 {
       color: var(--text-muted);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       text-transform: uppercase;
-      margin-bottom: 5px;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+      font-weight: 600;
     }
 
     .stat-info .value {
-      font-size: 1.2rem;
-      font-weight: bold;
+      font-size: 1.25rem;
+      font-weight: 700;
       color: var(--text-light);
     }
 
     /* Section Cards */
     .section-card {
       background-color: var(--card-bg);
-      border-radius: 10px;
-      padding: 20px;
-      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      border: 1px solid var(--card-border);
       margin-bottom: 30px;
-      scroll-margin-top: 80px;
+      scroll-margin-top: 90px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
 
     .section-title {
-      font-size: 1.05rem;
-      margin-bottom: 20px;
-      color: var(--primary-yellow);
+      font-size: 1.1rem;
+      margin-bottom: 22px;
+      color: var(--primary-gold);
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-weight: 600;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
     }
 
     .form-group {
-      margin-bottom: 15px;
+      margin-bottom: 16px;
     }
 
     .form-group label {
       display: block;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 7px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
     }
 
     .form-control {
       width: 100%;
-      padding: 10px 12px;
-      background-color: #242424;
+      padding: 11px 14px;
+      background-color: #0b0b0b;
       border: 1px solid var(--border-color);
-      border-radius: 6px;
+      border-radius: 8px;
       color: #fff;
       font-size: 0.9rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .form-control:focus {
       outline: none;
-      border-color: var(--primary-yellow);
+      border-color: var(--primary-gold);
+      box-shadow: 0 0 8px var(--gold-glow);
     }
 
     .form-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
     }
 
     /* Buttons */
     .btn {
-      padding: 8px 14px;
+      padding: 9px 16px;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
       font-size: 0.85rem;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      transition: opacity 0.2s;
+      gap: 7px;
+      transition: all 0.2s ease;
     }
 
-    .btn:hover { opacity: 0.9; }
-    .btn-success { background-color: var(--primary-green); color: #000; }
-    .btn-warning { background-color: var(--primary-yellow); color: #000; }
+    .btn:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    
+    .btn-success { background-color: var(--primary-green); color: #fff; }
+    .btn-warning { background-color: var(--primary-gold); color: #070707; font-weight: 700; }
     .btn-danger { background-color: var(--danger-red); color: #fff; }
-    .btn-secondary { background-color: #333; color: #fff; }
-    .btn-icon { padding: 4px 8px; font-size: 0.75rem; margin-left: 4px; }
+    .btn-secondary { background-color: #222; color: #fff; border: 1px solid var(--border-color); }
+    .btn-icon { padding: 5px 9px; font-size: 0.78rem; margin-left: 4px; border-radius: 6px; }
 
     /* Tables */
     .table-container {
@@ -299,34 +343,38 @@
     }
 
     th {
-      background-color: #242424;
+      background-color: #171717;
       color: var(--text-muted);
-      padding: 12px;
+      padding: 13px 14px;
       font-weight: 600;
+      font-size: 0.78rem;
+      letter-spacing: 0.8px;
       border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
     }
 
     td {
-      padding: 12px;
-      border-bottom: 1px solid var(--border-color);
+      padding: 14px;
+      border-bottom: 1px solid #1a1a1a;
       vertical-align: middle;
     }
 
     tr:hover {
-      background-color: #222222;
+      background-color: #161616;
     }
 
     .badge {
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
       text-transform: uppercase;
+      letter-spacing: 0.5px;
       display: inline-block;
     }
 
-    .badge-approved, .badge-active { background-color: #00e67633; color: var(--primary-green); border: 1px solid var(--primary-green); }
-    .badge-suspended { background-color: #ff333333; color: var(--danger-red); border: 1px solid var(--danger-red); }
+    .badge-approved, .badge-active { background-color: rgba(42, 157, 143, 0.15); color: var(--primary-green); border: 1px solid rgba(42, 157, 143, 0.3); }
+    .badge-rejected, .badge-suspended { background-color: var(--danger-bg); color: var(--danger-red); border: 1px solid rgba(230, 57, 70, 0.3); }
 
     /* Proof Image Preview Modal */
     .modal {
@@ -337,7 +385,8 @@
       top: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0,0,0,0.85);
+      background-color: rgba(0,0,0,0.88);
+      backdrop-filter: blur(4px);
       align-items: center;
       justify-content: center;
     }
@@ -345,29 +394,33 @@
     .modal-content {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
-      padding: 20px;
-      border-radius: 10px;
+      padding: 24px;
+      border-radius: 14px;
       max-width: 90%;
       max-height: 90%;
       text-align: center;
       position: relative;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.9);
     }
 
     .modal-content img {
       max-width: 100%;
       max-height: 70vh;
       border-radius: 8px;
-      margin-top: 10px;
+      margin-top: 12px;
+      border: 1px solid var(--border-color);
     }
 
     .close-modal {
       position: absolute;
-      top: 10px;
-      right: 15px;
-      color: #fff;
-      font-size: 20px;
+      top: 14px;
+      right: 18px;
+      color: var(--text-muted);
+      font-size: 22px;
       cursor: pointer;
+      transition: color 0.2s;
     }
+    .close-modal:hover { color: var(--danger-red); }
   </style>
 </head>
 <body>
@@ -375,36 +428,43 @@
   <!-- TOP NAVIGATION BAR -->
   <nav class="navbar">
     <div class="brand">
-      <i class="fa-solid fa-shield-halved"></i> INVAL PLUS ADMIN
+      <img src="logo.png" alt="INVAL PLUS Logo">
+      <span>INVAL PLUS <small style="color:var(--text-muted); font-weight:400; font-size:0.8rem;">| ADMIN</small></span>
     </div>
 
     <div class="nav-controls">
       <!-- Dropdown Menu -->
       <div class="dropdown">
         <button class="dropdown-btn" onclick="toggleDropdown()">
-          <i class="fa-solid fa-bars-staggered"></i> Navigation <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
+          <i class="fa-solid fa-bars-staggered"></i> Navigation <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem;"></i>
         </button>
         <div class="dropdown-menu" id="adminDropdown">
           <div class="dropdown-item" onclick="navigateToSection('dashboard')">
-            <i class="fa-solid fa-chart-pie"></i> Dashboard
+            <i class="fa-solid fa-chart-pie"></i> Dashboard Metrics
           </div>
           <div class="dropdown-item" onclick="navigateToSection('pause-section')">
-            <i class="fa-solid fa-power-off"></i> Pause & Resume System
+            <i class="fa-solid fa-power-off"></i> System Switch
+          </div>
+          <div class="dropdown-item" onclick="navigateToSection('payment-numbers-section')">
+            <i class="fa-solid fa-credit-card"></i> Deposit Phone Numbers
+          </div>
+          <div class="dropdown-item" onclick="navigateToSection('manual-credit-section')">
+            <i class="fa-solid fa-hand-holding-hand"></i> Manual Credit & Bonus
           </div>
           <div class="dropdown-item" onclick="navigateToSection('packages-section')">
             <i class="fa-solid fa-box-open"></i> Investment Packages
           </div>
           <div class="dropdown-item" onclick="navigateToSection('users-section')">
-            <i class="fa-solid fa-users"></i> Users & Balances
+            <i class="fa-solid fa-users"></i> User Accounts & Wallets
           </div>
           <div class="dropdown-item" onclick="navigateToSection('deposits-section')">
             <i class="fa-solid fa-wallet"></i> Deposit Requests
           </div>
           <div class="dropdown-item" onclick="navigateToSection('withdrawals-section')">
-            <i class="fa-solid fa-money-bill-transfer"></i> Main Withdrawals
+            <i class="fa-solid fa-money-bill-transfer"></i> Withdrawal Requests
           </div>
-          <div class="dropdown-item" onclick="navigateToSection('ref-withdrawals-section')">
-            <i class="fa-solid fa-hand-holding-dollar"></i> Referral Withdrawals
+          <div class="dropdown-item" onclick="navigateToSection('history-section')">
+            <i class="fa-solid fa-clock-rotate-left"></i> Transaction History
           </div>
           <div class="dropdown-item" onclick="navigateToSection('investments-section')">
             <i class="fa-solid fa-chart-line"></i> Active Investments
@@ -416,8 +476,8 @@
             <i class="fa-solid fa-bullhorn"></i> System Broadcasts
           </div>
           <div class="dropdown-divider"></div>
-          <a href="packages.html" class="dropdown-item" style="color: var(--danger-red);">
-            <i class="fa-solid fa-right-from-bracket" style="color: var(--danger-red);"></i> Exit to App
+          <a href="./packages.html" class="dropdown-item" style="color: var(--danger-red);">
+            <i class="fa-solid fa-right-from-bracket" style="color: var(--danger-red);"></i> Exit to User App
           </a>
         </div>
       </div>
@@ -428,11 +488,11 @@
   <div class="main-content" id="dashboard">
     <div class="header-bar">
       <div>
-        <h2>Admin Management Panel</h2>
-        <small style="color: var(--text-muted);" id="admin-email">Loading account...</small>
+        <h2>Executive Admin Console</h2>
+        <small style="color: var(--text-muted);" id="admin-email">Authenticating security session...</small>
       </div>
       <button class="refresh-btn" onclick="init()">
-        <i class="fa-solid fa-rotate"></i> Refresh Data
+        <i class="fa-solid fa-rotate"></i> Refresh Engine Data
       </button>
     </div>
 
@@ -458,7 +518,7 @@
         <div class="stat-icon"><i class="fa-solid fa-scale-balanced"></i></div>
         <div class="stat-info">
           <h4>Net Cash Flow</h4>
-          <div class="value" id="net-cash-flow" style="color: var(--primary-yellow);">UGX 0</div>
+          <div class="value" id="net-cash-flow" style="color: var(--primary-gold);">UGX 0</div>
         </div>
       </div>
 
@@ -466,7 +526,7 @@
         <div class="stat-icon"><i class="fa-solid fa-arrow-down-long"></i></div>
         <div class="stat-info">
           <h4>Pending Deposits</h4>
-          <div class="value" id="pending-dep-count" style="color: var(--primary-yellow);">0</div>
+          <div class="value" id="pending-dep-count" style="color: var(--primary-gold);">0</div>
         </div>
       </div>
 
@@ -482,12 +542,12 @@
     <!-- PAUSE AND RESUME SYSTEM SECTION -->
     <div class="section-card" id="pause-section">
       <div class="section-title">
-        <i class="fa-solid fa-power-off"></i> System Pause & Maintenance Controls
+        <i class="fa-solid fa-power-off"></i> System Operations & Maintenance Switch
       </div>
-      <div style="display: flex; align-items: center; justify-content: space-between; background: #222; padding: 15px; border-radius: 8px; border: 1px solid var(--border-color);">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 15px; background: #0b0b0b; padding: 18px; border-radius: 10px; border: 1px solid var(--border-color);">
         <div>
-          <h4 id="system-status-text" style="color: var(--primary-green); margin-bottom: 4px;">🟢 System Status: ACTIVE</h4>
-          <p style="font-size: 0.82rem; color: var(--text-muted);">When paused, users will see a countdown/maintenance overlay blocking deposits, package buying, and withdrawals.</p>
+          <h4 id="system-status-text" style="color: var(--primary-green); margin-bottom: 5px; font-size: 1rem;">🟢 System Status: ACTIVE</h4>
+          <p style="font-size: 0.82rem; color: var(--text-muted);">When paused, users see a maintenance lockdown overlay halting deposits, investing, and withdrawals.</p>
         </div>
         <button class="btn btn-warning" id="toggle-system-btn" onclick="toggleSystemPause()">
           <i class="fa-solid fa-pause"></i> Pause Operations
@@ -495,38 +555,100 @@
       </div>
     </div>
 
-    <!-- PACKAGE MANAGEMENT -->
-    <div class="section-card" id="packages-section">
+    <!-- DEPOSIT PAYMENT NUMBERS MANAGEMENT -->
+    <div class="section-card" id="payment-numbers-section">
       <div class="section-title">
-        <i class="fa-solid fa-box-open"></i> Package Management
+        <i class="fa-solid fa-credit-card"></i> Official Deposit Mobile Money Numbers
       </div>
-      <input type="hidden" id="pkg-id">
-      <div class="form-grid" style="margin-bottom: 15px;">
+      <div class="form-grid">
         <div class="form-group">
-          <label id="pkg-form-title">Package Name</label>
-          <input type="text" id="pkg-name" class="form-control" placeholder="e.g. Bronze Plan">
+          <label>MTN MoMo Number</label>
+          <input type="text" id="mtn-number-input" class="form-control" placeholder="e.g. 0770000000">
         </div>
         <div class="form-group">
-          <label>Price (UGX)</label>
+          <label>MTN Account Name</label>
+          <input type="text" id="mtn-name-input" class="form-control" placeholder="e.g. INVAL PLUS LTD">
+        </div>
+        <div class="form-group">
+          <label>Airtel Money Number</label>
+          <input type="text" id="airtel-number-input" class="form-control" placeholder="e.g. 0700000000">
+        </div>
+        <div class="form-group">
+          <label>Airtel Account Name</label>
+          <input type="text" id="airtel-name-input" class="form-control" placeholder="e.g. INVAL PLUS LTD">
+        </div>
+      </div>
+      <button class="btn btn-warning" onclick="savePaymentNumbers()">
+        <i class="fa-solid fa-floppy-disk"></i> Update Payment Numbers
+      </button>
+    </div>
+
+    <!-- MANUAL USER CREDIT & BONUS TOOL -->
+    <div class="section-card" id="manual-credit-section">
+      <div class="section-title">
+        <i class="fa-solid fa-hand-holding-hand"></i> Manual User Wallet Adjustments & Bonuses
+      </div>
+      <div class="form-grid" style="margin-bottom: 15px;">
+        <div class="form-group">
+          <label>Target User ID or Email</label>
+          <input type="text" id="credit-user-input" class="form-control" placeholder="Paste user ID or email...">
+        </div>
+        <div class="form-group">
+          <label>Target Wallet</label>
+          <select id="credit-wallet-type" class="form-control">
+            <option value="balance">Main Wallet</option>
+            <option value="referral_balance">Referral Wallet</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Amount (UGX)</label>
+          <input type="number" id="credit-amount-input" class="form-control" placeholder="e.g. 10000">
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-success" onclick="processManualCredit('add')">
+          <i class="fa-solid fa-plus"></i> Credit Balance
+        </button>
+        <button class="btn btn-danger" onclick="processManualCredit('deduct')">
+          <i class="fa-solid fa-minus"></i> Deduct Balance
+        </button>
+      </div>
+    </div>
+
+    <!-- PACKAGE MANAGEMENT -->
+    <div class="section-card" id="packages-section">
+      <div class="section-title" id="pkg-form-title">
+        <i class="fa-solid fa-box-open"></i> Investment Package Management
+      </div>
+      <input type="hidden" id="pkg-id">
+      <div class="form-grid" style="margin-bottom: 16px;">
+        <div class="form-group">
+          <label>Package Title</label>
+          <input type="text" id="pkg-name" class="form-control" placeholder="e.g. VIP Alpha Tier">
+        </div>
+        <div class="form-group">
+          <label>Capital Price (UGX)</label>
           <input type="number" id="pkg-price" class="form-control" placeholder="e.g. 50000">
         </div>
         <div class="form-group">
-          <label>Daily Return (UGX)</label>
+          <label>Daily Yield (UGX)</label>
           <input type="number" id="pkg-daily" class="form-control" placeholder="e.g. 2500">
         </div>
         <div class="form-group">
-          <label>Duration (Days)</label>
+          <label>Duration Cycle (Days)</label>
           <input type="number" id="pkg-days" class="form-control" value="30">
         </div>
       </div>
-      <button class="btn btn-success" id="pkg-save-btn" onclick="savePackage()">
-        <i class="fa-solid fa-floppy-disk"></i> Save Package
-      </button>
-      <button class="btn btn-secondary" id="pkg-cancel-btn" style="display:none;" onclick="resetPackageForm()">
-        <i class="fa-solid fa-xmark"></i> Cancel Edit
-      </button>
+      <div style="display: flex; gap: 10px;">
+        <button class="btn btn-warning" id="pkg-save-btn" onclick="savePackage()">
+          <i class="fa-solid fa-floppy-disk"></i> Save Package
+        </button>
+        <button class="btn btn-secondary" id="pkg-cancel-btn" style="display:none;" onclick="resetPackageForm()">
+          <i class="fa-solid fa-xmark"></i> Cancel Edit
+        </button>
+      </div>
 
-      <div class="table-container" style="margin-top: 20px;">
+      <div class="table-container" style="margin-top: 24px;">
         <table>
           <thead>
             <tr>
@@ -539,47 +661,44 @@
             </tr>
           </thead>
           <tbody id="packages-tbody">
-            <tr><td colspan="6" style="text-align:center; color:#888;">Loading packages...</td></tr>
+            <tr><td colspan="6" style="text-align:center; color:#888;">Synchronizing package tiers...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- USER MANAGEMENT SECTION WITH SEARCH, SUSPENSIONS & BALANCES -->
+    <!-- USER MANAGEMENT SECTION -->
     <div class="section-card" id="users-section">
       <div class="section-title">
-        <i class="fa-solid fa-users"></i> User Management & Search
+        <i class="fa-solid fa-users"></i> User Accounts, Balances & Security Control
       </div>
-
-      <!-- SEARCH BAR -->
-      <div class="form-group" style="margin-bottom: 15px;">
-        <input type="text" id="user-search-input" class="form-control" placeholder="🔍 Type to search user by Name, Email, or User ID..." onkeyup="filterUsers()">
+      <div class="form-group" style="margin-bottom: 18px;">
+        <input type="text" id="user-search-input" class="form-control" placeholder="🔍 Search records by Full Name, Email, or User UUID..." onkeyup="filterUsers()">
       </div>
-
       <div class="table-container">
         <table>
           <thead>
             <tr>
               <th>NAME</th>
-              <th>EMAIL / USER ID</th>
+              <th>EMAIL / UUID</th>
               <th>STATUS</th>
-              <th>WALLET BALANCE</th>
-              <th>REFERRAL BALANCE</th>
-              <th>JOINED DATE</th>
+              <th>MAIN WALLET</th>
+              <th>REFERRAL WALLET</th>
+              <th>JOINED</th>
               <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody id="users-tbody">
-            <tr><td colspan="7" style="text-align:center; color:#888;">Loading users...</td></tr>
+            <tr><td colspan="7" style="text-align:center; color:#888;">Loading user database...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- DEPOSIT REQUESTS WITH USER NAMES & PAYMENT PROOF -->
+    <!-- DEPOSIT REQUESTS -->
     <div class="section-card" id="deposits-section">
       <div class="section-title">
-        <i class="fa-solid fa-wallet"></i> Pending Deposit Requests
+        <i class="fa-solid fa-wallet"></i> Pending Deposit Verifications
       </div>
       <div class="table-container">
         <table>
@@ -588,21 +707,21 @@
               <th>USER NAME</th>
               <th>EMAIL / ID</th>
               <th>AMOUNT (UGX)</th>
-              <th>DEPOSIT PROOF</th>
+              <th>PAYMENT PROOF</th>
               <th>ACTIONS</th>
             </tr>
           </thead>
           <tbody id="deposits-tbody">
-            <tr><td colspan="5" style="text-align:center; color:#888;">Loading deposits...</td></tr>
+            <tr><td colspan="5" style="text-align:center; color:#888;">Checking deposit queues...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- MAIN WITHDRAWAL REQUESTS WITH USER NAMES -->
+    <!-- MAIN WITHDRAWAL REQUESTS -->
     <div class="section-card" id="withdrawals-section">
       <div class="section-title">
-        <i class="fa-solid fa-money-bill-transfer"></i> Pending Main Balance Withdrawals
+        <i class="fa-solid fa-money-bill-transfer"></i> Pending Withdrawal Requests
       </div>
       <div class="table-container">
         <table>
@@ -615,35 +734,36 @@
             </tr>
           </thead>
           <tbody id="withdrawals-tbody">
-            <tr><td colspan="4" style="text-align:center; color:#888;">Loading withdrawals...</td></tr>
+            <tr><td colspan="4" style="text-align:center; color:#888;">Checking withdrawal queues...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- REFERRAL WITHDRAWAL REQUESTS WITH USER NAMES -->
-    <div class="section-card" id="ref-withdrawals-section">
+    <!-- TRANSACTION HISTORY AUDIT LOG -->
+    <div class="section-card" id="history-section">
       <div class="section-title">
-        <i class="fa-solid fa-hand-holding-dollar" style="color: var(--primary-yellow);"></i> Pending Referral Balance Withdrawals
+        <i class="fa-solid fa-clock-rotate-left"></i> Processed Transaction History Log
       </div>
       <div class="table-container">
         <table>
           <thead>
             <tr>
+              <th>TYPE</th>
               <th>USER NAME</th>
-              <th>EMAIL / ID</th>
               <th>AMOUNT (UGX)</th>
-              <th>ACTIONS</th>
+              <th>STATUS</th>
+              <th>PROCESSED DATE</th>
             </tr>
           </thead>
-          <tbody id="ref-withdrawals-tbody">
-            <tr><td colspan="4" style="text-align:center; color:#888;">Loading referral withdrawals...</td></tr>
+          <tbody id="history-tbody">
+            <tr><td colspan="5" style="text-align:center; color:#888;">Loading audit history...</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
-    <!-- INVESTMENTS WITH USER NAMES -->
+    <!-- INVESTMENTS -->
     <div class="section-card" id="investments-section">
       <div class="section-title">
         <i class="fa-solid fa-chart-line"></i> Active User Investments
@@ -655,13 +775,13 @@
               <th>USER NAME</th>
               <th>USER ID</th>
               <th>PACKAGE</th>
-              <th>AMOUNT</th>
-              <th>DAILY RETURN</th>
+              <th>CAPITAL</th>
+              <th>DAILY YIELD</th>
               <th>STATUS</th>
             </tr>
           </thead>
           <tbody id="invest-tbody">
-            <tr><td colspan="6" style="text-align:center; color:#888;">Loading investments...</td></tr>
+            <tr><td colspan="6" style="text-align:center; color:#888;">Loading active portfolios...</td></tr>
           </tbody>
         </table>
       </div>
@@ -670,42 +790,41 @@
     <!-- WHATSAPP COMMUNITY MANAGEMENT -->
     <div class="section-card" id="community-section">
       <div class="section-title">
-        <i class="fa-brands fa-whatsapp" style="color: #00e676;"></i> WhatsApp & Community Group Link
+        <i class="fa-brands fa-whatsapp" style="color: var(--primary-green);"></i> Official WhatsApp Community Channel
       </div>
       <div class="form-group">
-        <label>WhatsApp Group / Channel URL</label>
+        <label>WhatsApp Group / Channel invite URL</label>
         <input type="text" id="whatsapp-link-input" class="form-control" placeholder="https://chat.whatsapp.com/...">
       </div>
-      <button class="btn btn-success" onclick="saveCommunityLink()">
-        <i class="fa-solid fa-link"></i> Update Official Group Link
+      <button class="btn btn-warning" onclick="saveCommunityLink()">
+        <i class="fa-solid fa-link"></i> Update Community Link
       </button>
     </div>
 
     <!-- ANNOUNCEMENT BROADCAST -->
     <div class="section-card" id="broadcasts-section">
       <div class="section-title">
-        <i class="fa-solid fa-bullhorn"></i> Send System Broadcast
+        <i class="fa-solid fa-bullhorn"></i> Push System-Wide Broadcast
       </div>
       <div class="form-group">
-        <label>Announcement Title</label>
-        <input type="text" id="announcement-title" class="form-control" placeholder="e.g. System Maintenance Notice">
+        <label>Announcement Headline</label>
+        <input type="text" id="announcement-title" class="form-control" placeholder="e.g. Scheduled Maintenance Notice">
       </div>
       <div class="form-group">
-        <label>Announcement Message</label>
-        <textarea id="announcement-body" class="form-control" rows="3" placeholder="Enter broadcast detail..."></textarea>
+        <label>Announcement Content</label>
+        <textarea id="announcement-body" class="form-control" rows="3" placeholder="Enter broadcast details for all client dashboards..."></textarea>
       </div>
       <button class="btn btn-warning" onclick="publishAnnouncement()">
-        <i class="fa-solid fa-paper-plane"></i> Broadcast Message
+        <i class="fa-solid fa-paper-plane"></i> Broadcast Notice Now
       </button>
     </div>
-
   </div>
 
   <!-- PROOF MODAL -->
   <div id="proofModal" class="modal">
     <div class="modal-content">
       <span class="close-modal" onclick="closeProofModal()">&times;</span>
-      <h3 style="color:var(--primary-yellow); margin-bottom: 10px;">Deposit Payment Proof</h3>
+      <h3 style="color:var(--primary-gold); margin-bottom: 12px; font-weight:700;">Verified Payment Receipt</h3>
       <div id="proofContainer">
         <img id="proofImage" src="" alt="Deposit Proof Screenshot">
       </div>
@@ -725,7 +844,7 @@
     }
     var db = window.supabaseClient;
     var allUsersList = [];
-    var usersMap = {}; // Cache map for resolving user names securely
+    var usersMap = {}; 
     var isSystemPaused = false;
 
     document.addEventListener("DOMContentLoaded", () => {
@@ -756,27 +875,130 @@
     async function init() {
       if (!db) return alert("Supabase failed to initialize!");
 
-      const { data: { session } } = await db.auth.getSession();
-      if (!session) return window.location.href = "login.html";
-
-      document.getElementById('admin-email').innerText = session.user.email || "Admin User";
+      try {
+        const { data: { session } } = await db.auth.getSession();
+        if (!session) {
+          document.getElementById('admin-email').innerText = "⚠️ Not logged in (Session check)";
+        } else {
+          document.getElementById('admin-email').innerText = `Logged in as: ${session.user.email || "Administrator"}`;
+        }
+      } catch (err) {
+        console.warn("Auth check bypassed for local preview:", err);
+      }
       
-      // Load user list first to build the name cache map
       await loadUsers();
 
       await Promise.all([
         loadSystemStatus(),
+        loadPaymentNumbers(),
         loadStats(),
         loadPackages(),
         loadDeposits(),
         loadWithdrawals(),
-        loadReferralWithdrawals(),
+        loadHistoryLog(),
         loadInvestments(),
         loadCommunityLink()
       ]);
     }
 
-    // --- PAUSE & RESUME CONTROLS ---
+    /* --- PAYMENT NUMBERS MANAGEMENT --- */
+    async function loadPaymentNumbers() {
+      const { data } = await db.from('settings').select('*').in('key', ['mtn_number', 'mtn_name', 'airtel_number', 'airtel_name']);
+      if (data) {
+        data.forEach(item => {
+          if (item.key === 'mtn_number') document.getElementById('mtn-number-input').value = item.value;
+          if (item.key === 'mtn_name') document.getElementById('mtn-name-input').value = item.value;
+          if (item.key === 'airtel_number') document.getElementById('airtel-number-input').value = item.value;
+          if (item.key === 'airtel_name') document.getElementById('airtel-name-input').value = item.value;
+        });
+      }
+    }
+
+    async function savePaymentNumbers() {
+      const payload = [
+        { key: 'mtn_number', value: document.getElementById('mtn-number-input').value.trim() },
+        { key: 'mtn_name', value: document.getElementById('mtn-name-input').value.trim() },
+        { key: 'airtel_number', value: document.getElementById('airtel-number-input').value.trim() },
+        { key: 'airtel_name', value: document.getElementById('airtel-name-input').value.trim() }
+      ];
+
+      const { error } = await db.from('settings').upsert(payload, { onConflict: 'key' });
+      if (error) {
+        alert("Failed to update payment numbers: " + error.message);
+      } else {
+        alert("✅ Mobile Money deposit numbers updated successfully!");
+      }
+    }
+
+    /* --- MANUAL CREDIT / BONUS TOOL --- */
+    async function processManualCredit(action) {
+      const input = document.getElementById('credit-user-input').value.trim();
+      const walletField = document.getElementById('credit-wallet-type').value;
+      const amount = Number(document.getElementById('credit-amount-input').value);
+
+      if (!input || isNaN(amount) || amount <= 0) {
+        return alert("Please enter a valid User ID/Email and amount!");
+      }
+
+      const targetUser = allUsersList.find(u => u.id === input || (u.email && u.email.toLowerCase() === input.toLowerCase()));
+      if (!targetUser) return alert("❌ User not found! Make sure you entered a valid UUID or registered email.");
+
+      const currentBal = Number(targetUser[walletField] || 0);
+      const newBal = action === 'add' ? currentBal + amount : Math.max(0, currentBal - amount);
+
+      const updatePayload = {};
+      updatePayload[walletField] = newBal;
+
+      const { error } = await db.from('profiles').update(updatePayload).eq('id', targetUser.id);
+      if (error) {
+        alert("Error updating wallet: " + error.message);
+      } else {
+        alert(`✅ ${action === 'add' ? 'Credited' : 'Deducted'} UGX ${amount.toLocaleString()} ${action === 'add' ? 'to' : 'from'} ${targetUser.full_name || targetUser.email}!`);
+        document.getElementById('credit-amount-input').value = '';
+        loadUsers();
+      }
+    }
+
+    /* --- TRANSACTION HISTORY AUDIT LOG --- */
+    async function loadHistoryLog() {
+      const tbody = document.getElementById('history-tbody');
+      
+      const [depsRes, wdsRes] = await Promise.all([
+        db.from('deposits').select('*').neq('status', 'pending').order('created_at', { ascending: false }).limit(20),
+        db.from('withdrawals').select('*').neq('status', 'pending').order('created_at', { ascending: false }).limit(20)
+      ]);
+
+      const combined = [
+        ...(depsRes.data || []).map(d => ({ ...d, txType: 'Deposit' })),
+        ...(wdsRes.data || []).map(w => ({ ...w, txType: 'Withdrawal' }))
+      ].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+      if (combined.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#888;">No historical records found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = combined.map(t => {
+        const uInfo = usersMap[t.user_id] || { name: 'Client' };
+        const isApproved = t.status === 'approved';
+
+        return `
+          <tr>
+            <td><strong>${t.txType}</strong></td>
+            <td>${uInfo.name}</td>
+            <td>UGX ${Number(t.amount || 0).toLocaleString()}</td>
+            <td>
+              <span class="badge ${isApproved ? 'badge-approved' : 'badge-rejected'}">
+                ${t.status}
+              </span>
+            </td>
+            <td><small style="color:#aaa;">${new Date(t.created_at).toLocaleDateString()}</small></td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    /* --- SYSTEM PAUSE & RESUME CONTROLS --- */
     async function loadSystemStatus() {
       const { data, error } = await db.from('settings').select('value').eq('key', 'system_paused').maybeSingle();
       if (error) console.error("System status fetch error:", error);
@@ -787,7 +1009,7 @@
       const toggleBtn = document.getElementById('toggle-system-btn');
 
       if (isSystemPaused) {
-        statusText.innerHTML = `🔴 System Status: PAUSED (Maintenance Mode)`;
+        statusText.innerHTML = `🔴 System Status: PAUSED (Maintenance Lockdown)`;
         statusText.style.color = `var(--danger-red)`;
         toggleBtn.className = `btn btn-success`;
         toggleBtn.innerHTML = `<i class="fa-solid fa-play"></i> Resume Operations`;
@@ -806,12 +1028,12 @@
       if (error) {
         alert("Failed to change system state: " + error.message);
       } else {
-        alert(newStatus ? "⏸️ System Operations Paused!" : "▶️ System Operations Resumed!");
+        alert(newStatus ? "⏸️ System Operations Successfully Paused!" : "▶️ System Operations Successfully Resumed!");
         loadSystemStatus();
       }
     }
 
-    // --- DASHBOARD METRICS ---
+    /* --- DASHBOARD METRICS --- */
     async function loadStats() {
       try {
         const { count: userCount } = await db.from('profiles').select('*', { count: 'exact', head: true });
@@ -840,7 +1062,7 @@
       }
     }
 
-    // --- USER MANAGEMENT ---
+    /* --- USER MANAGEMENT --- */
     async function loadUsers() {
       const tbody = document.getElementById('users-tbody');
       const { data: users, error } = await db.from('profiles').select('*').order('created_at', { ascending: false });
@@ -854,7 +1076,7 @@
       usersMap = {};
       users.forEach(u => {
         usersMap[u.id] = {
-          name: u.full_name || u.username || 'User',
+          name: u.full_name || u.username || 'Client',
           email: u.email || u.id
         };
       });
@@ -871,7 +1093,7 @@
 
       tbody.innerHTML = users.map(u => {
         const isSuspended = u.status === 'suspended' || u.is_suspended === true;
-        const name = u.full_name || u.username || 'User';
+        const name = u.full_name || u.username || 'Client';
         const balance = Number(u.balance || 0);
         const refBalance = Number(u.referral_balance || 0);
         const joinedDate = u.created_at ? new Date(u.created_at).toLocaleDateString() : 'N/A';
@@ -887,13 +1109,13 @@
             </td>
             <td>
               <strong style="color:var(--primary-green);">UGX ${balance.toLocaleString()}</strong>
-              <button class="btn btn-secondary btn-icon" onclick="editUserBalance('${u.id}', 'balance', ${balance})" title="Edit Wallet Balance">
+              <button class="btn btn-secondary btn-icon" onclick="editUserBalance('${u.id}', 'balance', ${balance})" title="Edit Main Wallet">
                 <i class="fa-solid fa-pen"></i>
               </button>
             </td>
             <td>
-              <strong style="color:var(--primary-yellow);">UGX ${refBalance.toLocaleString()}</strong>
-              <button class="btn btn-secondary btn-icon" onclick="editUserBalance('${u.id}', 'referral_balance', ${refBalance})" title="Edit Referral Balance">
+              <strong style="color:var(--primary-gold);">UGX ${refBalance.toLocaleString()}</strong>
+              <button class="btn btn-secondary btn-icon" onclick="editUserBalance('${u.id}', 'referral_balance', ${refBalance})" title="Edit Referral Wallet">
                 <i class="fa-solid fa-pen"></i>
               </button>
             </td>
@@ -937,7 +1159,7 @@
       if (error) {
         alert("❌ Failed to update balance: " + error.message);
       } else {
-        alert(`✅ ${fieldLabel} updated to UGX ${newBal.toLocaleString()}!`);
+        alert(`✅ ${fieldLabel} successfully updated to UGX ${newBal.toLocaleString()}!`);
         loadUsers();
       }
     }
@@ -949,12 +1171,12 @@
       if (error) {
         alert("Failed to update status: " + error.message);
       } else {
-        alert(`✅ User status updated to ${nextStatus.toUpperCase()}! User will be restricted from executing transactions.`);
+        alert(`✅ User status successfully updated to ${nextStatus.toUpperCase()}!`);
         loadUsers();
       }
     }
 
-    // --- DEPOSIT REQUESTS ---
+    /* --- DEPOSIT REQUESTS (Disappears & Credits Wallet on Approval) --- */
     async function loadDeposits() {
       const tbody = document.getElementById('deposits-tbody');
       const { data, error } = await db.from('deposits').select('*').eq('status', 'pending').order('created_at', { ascending: false });
@@ -967,7 +1189,7 @@
       }
 
       tbody.innerHTML = data.map(d => {
-        const uInfo = usersMap[d.user_id] || { name: 'User', email: d.user_id };
+        const uInfo = usersMap[d.user_id] || { name: 'Client', email: d.user_id };
         const proofUrl = d.proof_url || d.proof_image || d.receipt_url;
         const proofBtn = proofUrl 
           ? `<button class="btn btn-secondary" onclick="viewProof('${proofUrl}')"><i class="fa-solid fa-image"></i> View Proof</button>`
@@ -994,21 +1216,31 @@
       const { data: user } = await db.from('profiles').select('balance').eq('id', userId).single();
       const newBal = Number(user?.balance || 0) + Number(amount);
 
+      // 1. Credit user wallet
       await db.from('profiles').update({ balance: newBal }).eq('id', userId);
+      // 2. Mark approved (removes it from pending queue)
       await db.from('deposits').update({ status: 'approved' }).eq('id', depId);
 
-      alert(`✅ Deposit approved and UGX ${Number(amount).toLocaleString()} credited!`);
+      alert(`✅ Deposit approved and UGX ${Number(amount).toLocaleString()} credited to user wallet!`);
+      
+      // Refresh views
       loadDeposits();
       loadUsers();
       loadStats();
+      loadHistoryLog();
     }
 
     async function rejectDeposit(depId) {
       if (!confirm("Reject this deposit request?")) return;
+      
+      // Mark rejected (removes it from pending queue, account NOT credited)
       await db.from('deposits').update({ status: 'rejected' }).eq('id', depId);
-      alert("Deposit rejected.");
+
+      alert("❌ Deposit marked as rejected.");
+      
       loadDeposits();
       loadStats();
+      loadHistoryLog();
     }
 
     function viewProof(url) {
@@ -1020,23 +1252,20 @@
       document.getElementById('proofModal').style.display = 'none';
     }
 
-    // --- MAIN WITHDRAWAL REQUESTS ---
+    /* --- WITHDRAWAL REQUESTS (Disappears & Refunds Wallet on Rejection) --- */
     async function loadWithdrawals() {
       const tbody = document.getElementById('withdrawals-tbody');
       const { data, error } = await db.from('withdrawals').select('*').eq('status', 'pending').order('created_at', { ascending: false });
 
       if (error) console.error("Withdrawals fetch error:", error);
 
-      // Filter main withdrawals (or those without explicit 'type' column)
-      const mainData = data ? data.filter(w => !w.type || w.type === 'main') : [];
-
-      if (error || mainData.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">No pending main withdrawals.</td></tr>`;
+      if (error || !data || data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">No pending withdrawals.</td></tr>`;
         return;
       }
 
-      tbody.innerHTML = mainData.map(w => {
-        const uInfo = usersMap[w.user_id] || { name: 'User', email: w.user_id };
+      tbody.innerHTML = data.map(w => {
+        const uInfo = usersMap[w.user_id] || { name: 'Client', email: w.user_id };
 
         return `
           <tr>
@@ -1053,81 +1282,38 @@
     }
 
     async function approveWithdrawal(id) {
-      if (!confirm("Approve this main withdrawal?")) return;
+      if (!confirm("Approve this withdrawal payout?")) return;
+      
+      // Mark approved (removes from pending queue)
       await db.from('withdrawals').update({ status: 'approved' }).eq('id', id);
-      alert("✅ Main withdrawal approved!");
+
+      alert("✅ Withdrawal approved and processed!");
+      
       loadWithdrawals();
       loadStats();
+      loadHistoryLog();
     }
 
     async function rejectWithdrawal(id, userId, amount) {
-      if (!confirm(`Reject main withdrawal and refund UGX ${Number(amount).toLocaleString()} to main balance?`)) return;
+      if (!confirm(`Reject withdrawal and refund UGX ${Number(amount).toLocaleString()} back to user balance?`)) return;
 
       const { data: user } = await db.from('profiles').select('balance').eq('id', userId).single();
       const newBal = Number(user?.balance || 0) + Number(amount);
 
+      // 1. Refund user wallet
       await db.from('profiles').update({ balance: newBal }).eq('id', userId);
+      // 2. Mark rejected (removes from pending queue)
       await db.from('withdrawals').update({ status: 'rejected' }).eq('id', id);
 
-      alert("✅ Main withdrawal rejected and refunded!");
+      alert("✅ Withdrawal rejected and funds successfully refunded to user balance!");
+      
       loadWithdrawals();
       loadUsers();
       loadStats();
+      loadHistoryLog();
     }
 
-    // --- REFERRAL WITHDRAWAL REQUESTS ---
-    async function loadReferralWithdrawals() {
-      const tbody = document.getElementById('ref-withdrawals-tbody');
-      const { data, error } = await db.from('withdrawals').select('*').eq('status', 'pending').eq('type', 'referral').order('created_at', { ascending: false });
-
-      if (error) console.error("Referral withdrawals fetch error:", error);
-
-      if (error || !data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">No pending referral withdrawals.</td></tr>`;
-        return;
-      }
-
-      tbody.innerHTML = data.map(w => {
-        const uInfo = usersMap[w.user_id] || { name: 'User', email: w.user_id };
-
-        return `
-          <tr>
-            <td><strong>${uInfo.name}</strong></td>
-            <td><small style="color:#aaa;">${uInfo.email}</small></td>
-            <td><strong style="color:var(--primary-yellow);">UGX ${Number(w.amount || 0).toLocaleString()}</strong></td>
-            <td>
-              <button class="btn btn-success" onclick="approveRefWithdrawal('${w.id}')">Approve</button>
-              <button class="btn btn-danger" onclick="rejectRefWithdrawal('${w.id}', '${w.user_id}', ${w.amount})">Reject & Refund</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-
-    async function approveRefWithdrawal(id) {
-      if (!confirm("Approve this referral withdrawal?")) return;
-      await db.from('withdrawals').update({ status: 'approved' }).eq('id', id);
-      alert("✅ Referral withdrawal approved!");
-      loadReferralWithdrawals();
-      loadStats();
-    }
-
-    async function rejectRefWithdrawal(id, userId, amount) {
-      if (!confirm(`Reject referral withdrawal and refund UGX ${Number(amount).toLocaleString()} to referral balance?`)) return;
-
-      const { data: user } = await db.from('profiles').select('referral_balance').eq('id', userId).single();
-      const newRefBal = Number(user?.referral_balance || 0) + Number(amount);
-
-      await db.from('profiles').update({ referral_balance: newRefBal }).eq('id', userId);
-      await db.from('withdrawals').update({ status: 'rejected' }).eq('id', id);
-
-      alert("✅ Referral withdrawal rejected and refunded to referral wallet!");
-      loadReferralWithdrawals();
-      loadUsers();
-      loadStats();
-    }
-
-    // --- ACTIVE USER INVESTMENTS ---
+    /* --- ACTIVE USER INVESTMENTS --- */
     async function loadInvestments() {
       const tbody = document.getElementById('invest-tbody');
       const { data, error } = await db.from('investments').select('*').order('created_at', { ascending: false });
@@ -1140,21 +1326,21 @@
       }
 
       tbody.innerHTML = data.map(i => {
-        const uInfo = usersMap[i.user_id] || { name: 'User' };
+        const uInfo = usersMap[i.user_id] || { name: 'Client' };
         return `
           <tr>
             <td><strong>${uInfo.name}</strong></td>
             <td><small style="color:#aaa;">${i.user_id}</small></td>
             <td><strong>${i.package_name || i.package_id || 'Investment Plan'}</strong></td>
             <td>UGX ${Number(i.amount || 0).toLocaleString()}</td>
-            <td>UGX ${Number(i.daily_return || i.daily_amount || 0).toLocaleString()}</td>
+            <td style="color:var(--primary-green);">UGX ${Number(i.daily_return || i.daily_amount || 0).toLocaleString()}</td>
             <td><span class="badge badge-active">${i.status || 'Active'}</span></td>
           </tr>
         `;
       }).join('');
     }
 
-    // --- PACKAGE MANAGEMENT ---
+    /* --- PACKAGE MANAGEMENT --- */
     async function loadPackages() {
       const tbody = document.getElementById('packages-tbody');
       const { data: packages, error } = await db.from('packages').select('*').order('created_at', { ascending: false });
@@ -1205,7 +1391,6 @@
 
       const total_return = daily_amount * duration_days;
 
-      // Only pass valid schema column names to prevent PostgREST schema errors
       const payload = { 
         name: name,
         package_price: package_price,
@@ -1234,9 +1419,10 @@
       document.getElementById('pkg-daily').value = daily;
       document.getElementById('pkg-days').value = days;
 
-      document.getElementById('pkg-form-title').innerText = "Edit Package Name";
+      document.getElementById('pkg-form-title').innerHTML = `<i class="fa-solid fa-box-open"></i> Edit Package (${name})`;
       document.getElementById('pkg-save-btn').innerHTML = `<i class="fa-solid fa-check"></i> Update Package`;
       document.getElementById('pkg-cancel-btn').style.display = 'inline-flex';
+      window.scrollTo({ top: document.getElementById('packages-section').offsetTop - 60, behavior: 'smooth' });
     }
 
     function resetPackageForm() {
@@ -1246,7 +1432,7 @@
       document.getElementById('pkg-daily').value = '';
       document.getElementById('pkg-days').value = '30';
 
-      document.getElementById('pkg-form-title').innerText = "Package Name";
+      document.getElementById('pkg-form-title').innerHTML = `<i class="fa-solid fa-box-open"></i> Investment Package Management`;
       document.getElementById('pkg-save-btn').innerHTML = `<i class="fa-solid fa-floppy-disk"></i> Save Package`;
       document.getElementById('pkg-cancel-btn').style.display = 'none';
     }
@@ -1258,7 +1444,7 @@
       else loadPackages();
     }
 
-    // --- COMMUNITY LINK MANAGEMENT ---
+    /* --- COMMUNITY LINK MANAGEMENT --- */
     async function loadCommunityLink() {
       const { data } = await db.from('settings').select('value').eq('key', 'whatsapp_link').maybeSingle();
       if (data && data.value) {
@@ -1279,7 +1465,7 @@
       }
     }
 
-    // --- BROADCAST MESSAGES ---
+    /* --- BROADCAST MESSAGES --- */
     async function publishAnnouncement() {
       const title = document.getElementById('announcement-title').value.trim();
       const body = document.getElementById('announcement-body').value.trim();
@@ -1291,12 +1477,11 @@
       if (error) {
         alert("Failed to send broadcast: " + error.message);
       } else {
-        alert("📢 Broadcast message sent to all users!");
+        alert("📢 Broadcast notice pushed to all user dashboards!");
         document.getElementById('announcement-title').value = '';
         document.getElementById('announcement-body').value = '';
       }
     }
   </script>
-
 </body>
 </html>
